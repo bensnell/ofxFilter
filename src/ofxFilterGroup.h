@@ -1,6 +1,6 @@
 #include "ofMain.h"
 #include "ofxRemoteUIServer.h"
-#include "ofxFilter.hpp"
+#include "ofxFilter.h"
 
 class ofxFilterGroup {
 public:
@@ -23,7 +23,7 @@ private:
 	ofxFilter* getFilter(string _key);
 	map<string, ofxFilter*> filters;
 
-	ofxFilterMode mode = FRAME_FILTER_KALMAN;
+	ofxFilterMode mode = FILTER_KALMAN;
 	float smoothness = 0.001;
 	float smoothnessExp = 3; // (0.1)^3
 	float rapidness = 0.01;

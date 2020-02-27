@@ -5,7 +5,7 @@
 //  Created by Ben Snell on 1/17/19.
 //
 
-#include "ofxFilterGroup.hpp"
+#include "ofxFilterGroup.h"
 
 // --------------------------------------------------
 ofxFilterGroup::ofxFilterGroup() {
@@ -24,7 +24,7 @@ void ofxFilterGroup::setupParams(string name) {
 	ruiGroupName = "Filter Group- " + groupName;
 	RUI_NEW_GROUP(ruiGroupName);
 	string modeNames[] = { "None", "Kalman", "Easing" };
-	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Mode", mode, FRAME_FILTER_NONE, FRAME_FILTER_EASING, modeNames);
+	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Mode", mode, FILTER_NONE, FILTER_EASING, modeNames);
 	RUI_SHARE_PARAM_WCN("FG" + name + "- Smooth Exponent", smoothnessExp, 0, 12);
 	RUI_SHARE_PARAM_WCN("FG" + name + "- Rapid Exponent", rapidnessExp, 0, 12);
 	RUI_SHARE_PARAM_WCN("FG" + name + "- Use Accel", bUseAccel);
@@ -44,14 +44,14 @@ void ofxFilterGroup::setup() {
 // --------------------------------------------------
 glm::mat4x4 ofxFilterGroup::applyFilter(string _key, glm::mat4x4 _frame) {
 	ofxFilter* f = getFilter(_key);
-	f->addFrame(_frame);
+	f->add(_frame);
 	return f->getFrame();
 }
 
 // --------------------------------------------------
 float ofxFilterGroup::applyFilter(string _key, float _scalar) {
 	ofxFilter* f = getFilter(_key);
-	f->addScalar(_scalar);
+	f->add(_scalar);
 	return f->getScalar();
 }
 
