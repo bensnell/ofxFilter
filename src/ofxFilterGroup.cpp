@@ -23,12 +23,21 @@ void ofxFilterGroup::setupParams(string name) {
 
 	ruiGroupName = "Filter Group- " + groupName;
 	RUI_NEW_GROUP(ruiGroupName);
-	string modeNames[] = { "None", "Kalman", "Easing" };
-	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Mode", mode, FILTER_NONE, FILTER_EASING, modeNames);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Smooth Exponent", smoothnessExp, 0, 12);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Rapid Exponent", rapidnessExp, 0, 12);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Use Accel", bUseAccel);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Easing Param", easingParam, 0, 1);
+	string modeNames[] = { "None", "Kalman" }; //, "Easing" };
+	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Mode", settings.mode, FILTER_NONE, NUM_FILTER_MODES-1, modeNames);
+	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Smoothness", settings.kalmanSmoothness, 0, 12);
+	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Rapidness", settings.kalmanRapidness, 0, 12);
+	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Use Accel", settings.bKalmanUseAccel);
+	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Use Jerk", settings.bKalmanUseJerk);
+	RUI_SHARE_PARAM_WCN("FG" + name + "- Easing Param", settings.easingParam, 0, 1);
+
+	string predNames[] = { "None", "Kalman", "Acc" };
+	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Pred Mode", settings.predMode, FILTER_PRED_NONE, NUM_FILTER_PRED_MODES-1, predNames);
+	//RUI_SHARE_PARAM_WCN("FG" + name + "- Pred Delay", settings.predDelay, 0, 20);
+
+	string postNames[] = { "None", "Easing" };
+	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Post Mode", settings.postMode, FILTER_POST_NONE, NUM_FILTER_POST_MODES-1, postNames);
+	RUI_SHARE_PARAM_WCN("FG" + name + "- Post Easing Param", settings.postEasingParam, 0, 1);
 
 }
 
@@ -42,31 +51,26 @@ void ofxFilterGroup::setup() {
 }
 
 // --------------------------------------------------
-glm::mat4x4 ofxFilterGroup::applyFilter(string _key, glm::mat4x4 _frame) {
-	ofxFilter* f = getFilter(_key);
-	f->add(_frame);
-	return f->getFrame();
-}
+ofxFilter* ofxFilterGroup::getFilter(string key, bool bCreateIfNone) {
 
-// --------------------------------------------------
-float ofxFilterGroup::applyFilter(string _key, float _scalar) {
-	ofxFilter* f = getFilter(_key);
-	f->add(_scalar);
-	return f->getScalar();
-}
+	if (filters.find(key) == filters.end()) {
+		if (!bCreateIfNone) return NULL;
 
-// --------------------------------------------------
-ofxFilter* ofxFilterGroup::getFilter(string _key) {
-
-	if (filters.find(_key) == filters.end()) {
 		// couldn't find it; create a new one
 		ofxFilter* f = new ofxFilter();
 		// Update params
-		updateParams(f);
+		f->setParams(settings);
+		f->setup();
 		// Save the filter
-		filters[_key] = f;
+		filters[key] = f;
 	}
-	return filters[_key];
+	return filters[key];
+}
+
+// --------------------------------------------------
+bool ofxFilterGroup::filterExists(string key) {
+
+	return filters.find(key) != filters.end();
 }
 
 // --------------------------------------------------
@@ -80,19 +84,9 @@ void ofxFilterGroup::paramsUpdated(RemoteUIServerCallBackArg& arg) {
 // --------------------------------------------------
 void ofxFilterGroup::updateAllParams() {
 
-	smoothness = powf(0.1, smoothnessExp);
-	rapidness = powf(0.1, rapidnessExp);
-
 	for (auto it = filters.begin(); it != filters.end(); it++) {
-		updateParams(it->second);
+		it->second->setParams(settings);
 	}
-}
-
-// --------------------------------------------------
-void ofxFilterGroup::updateParams(ofxFilter* filter) {
-	filter->setMode(mode);
-	filter->setParamsKalman(smoothness, rapidness, bUseAccel);
-	filter->setParamsEasing(easingParam);
 }
 
 // --------------------------------------------------

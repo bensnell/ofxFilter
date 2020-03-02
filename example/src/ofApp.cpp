@@ -2,9 +2,19 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
-	filter.setParamsKalman(1.0 / 100.0, 10.0 / 1.0, true, false);
 	ofSetFrameRate(60);
+
+
+	ofxFilterSettings settings;
+	settings.kalmanSmoothness = 5;
+	settings.kalmanRapidness = 2;
+	settings.bKalmanUseAccel = true;
+	settings.bKalmanUseJerk = false;
+	settings.predMode = ofxFilterPredMode::FILTER_PRED_ACC;
+	settings.postMode = ofxFilterPostMode::FILTER_POST_EASING;
+
+	filter.setParams(settings);
+	filter.setup();
 
 }
 
@@ -15,7 +25,8 @@ void ofApp::update(){
 
 		// Add a measurement
 		if (bMousePressed) {
-			filter.add(glm::vec2(ofGetMouseX(), ofGetMouseY()));
+			float rad = 5;
+			filter.add(glm::vec2(ofGetMouseX()+ofRandom(-rad,rad), ofGetMouseY()+ofRandom(-rad,rad)));
 		}
 		else {
 			filter.add();

@@ -36,7 +36,7 @@ glm::vec3 getZAxis(glm::mat4x4& a) {
 // --------------------------------------------------
 ofxFilter::ofxFilter() {
 
-	lastFrame = glm::translate(glm::vec3(0, 0, 0));
+	lastMeasurement = glm::translate(glm::vec3(0, 0, 0));
 
 	kalmanPosition.init(0.001, 0.01);
 	kalmanOrientation.init(0.001, 0.01);
@@ -50,29 +50,33 @@ ofxFilter::~ofxFilter() {
 
 // --------------------------------------------------
 void ofxFilter::add(glm::mat4x4& _m) {
-	lastFrame = _m;
-	switch (mode) {
+
+	// Save this measurement
+	lastMeasurement = _m;
+
+	// Add a measurement
+	switch (settings.mode) {
 	case FILTER_NONE: {
 
 		// nothing to do
 
 	}; break;
-	case FILTER_EASING: {
+	//case FILTER_EASING: {
 
-		glm::vec3 p;
-		glm::quat q;
-		decomposeMat4x4(_m, p, q);
+	//	glm::vec3 p;
+	//	glm::quat q;
+	//	decomposeMat4x4(_m, p, q);
 
-		if (bFirstEase) {
-			bFirstEase = false;
-			easedPosition = p;
-			easedQuaternion = q;
-		}
-		
-		easedPosition = glm::lerp(p, easedPosition, easingParam);
-		easedQuaternion = glm::slerp(q, easedQuaternion, easingParam);
+	//	if (bFirstEase) {
+	//		bFirstEase = false;
+	//		easedPosition = p;
+	//		easedQuaternion = q;
+	//	}
+	//	
+	//	easedPosition = glm::lerp(p, easedPosition, settings.easingParam);
+	//	easedQuaternion = glm::slerp(q, easedQuaternion, settings.easingParam);
 
-	}; break;
+	//}; break;
 	case FILTER_KALMAN: default: {
 
 		// decompose the matrix and update the filters
@@ -85,24 +89,35 @@ void ofxFilter::add(glm::mat4x4& _m) {
 
 	}; break;
 	}
+
+	// Mark that we have just received a measurement
+	nEmptyMeasurements = 0;
+
+	// Save the current measurement
+	thisFrame = getFilteredFrame();
 }
 
 // --------------------------------------------------
-glm::mat4x4 ofxFilter::getFrame() {
-	switch (mode) {
+glm::mat4x4 ofxFilter::getFilteredFrame() {
+	switch (settings.mode) {
 	case FILTER_NONE: {
 
-		return lastFrame;
+		return lastMeasurement;
 
 	}; break;
-	case FILTER_EASING: {
+	//case FILTER_EASING: {
 
-		glm::mat4x4 outMat;
-		composeMat4x4(easedPosition, easedQuaternion, outMat);
-		return outMat;
+	//	glm::mat4x4 outMat;
+	//	composeMat4x4(easedPosition, easedQuaternion, outMat);
+	//	return outMat;
 
-	}; break;
+	//}; break;
 	case FILTER_KALMAN: default: {
+
+		//glm::mat3 all = kalmanPosition.getPredictionAll();
+		//cout << "Pos:\t" << all[0][0] << "\t" << all[0][1] << "\t" << all[0][2] << endl;
+		//cout << "Vel:\t" << all[1][0] << "\t" << all[1][1] << "\t" << all[1][2] << endl;
+		//cout << "Acc:\t" << all[2][0] << "\t" << all[2][1] << "\t" << all[2][2] << endl;
 
 		glm::quat q = quatConvert(kalmanOrientation.getPrediction());
 		glm::vec3 p = kalmanPosition.getPrediction();
@@ -116,15 +131,36 @@ glm::mat4x4 ofxFilter::getFrame() {
 }
 
 // --------------------------------------------------
-void ofxFilter::setMode(ofxFilterMode _mode) {
-	mode = _mode;
+void ofxFilter::setParams(ofxFilterSettings _settings) {
+
+	// Save the settings
+	settings = _settings;
+
 }
 
 // --------------------------------------------------
-void ofxFilter::setParamsKalman(float smoothness, float rapidness, bool bUseAccel, bool bUseJerk) {
-	kalmanPosition.init(smoothness, rapidness, bUseAccel, bUseJerk);
-	kalmanOrientation.init(smoothness, rapidness, bUseAccel, bUseJerk);
-	// Do we also need to input the last measurement again?
+void ofxFilter::setup() {
+
+	// Initialize all necessary things
+	initialize();
+
+}
+
+// --------------------------------------------------
+void ofxFilter::initialize() {
+
+	// Kalman filters require initialization
+	cout << settings.getCalcKalmanRapidness() << "\t" << settings.getCalcKalmanSmoothness() << endl;
+	kalmanPosition.init(
+		settings.getCalcKalmanSmoothness(),
+		settings.getCalcKalmanRapidness(),
+		settings.bKalmanUseAccel,
+		settings.bKalmanUseJerk);
+	kalmanOrientation.init(
+		settings.getCalcKalmanSmoothness(),
+		settings.getCalcKalmanRapidness(),
+		settings.bKalmanUseAccel,
+		settings.bKalmanUseJerk);
 
 }
 
@@ -135,44 +171,15 @@ void ofxFilter::add(float _s) {
 }
 
 // --------------------------------------------------
-float ofxFilter::getScalar() {
-	return getTranslation(getFrame()).x;
-}
-
-// --------------------------------------------------
-void ofxFilter::setParamsEasing(float _easingParam) {
-	easingParam = _easingParam;
-}
-
-// --------------------------------------------------
 void ofxFilter::add(glm::vec3 _p) {
 	glm::mat4 m = glm::translate(_p);
 	add(m);
 }
 
 // --------------------------------------------------
-glm::vec3 ofxFilter::getPosition() {
-	return getTranslation(getFrame());
-}
-
-// --------------------------------------------------
 void ofxFilter::add(glm::vec2 _p) {
 	glm::mat4 m = glm::translate(glm::vec3(_p.x, _p.y, 0));
 	add(m);
-}
-
-// --------------------------------------------------
-glm::vec2 ofxFilter::getPosition2D() {
-	auto p = getTranslation(getFrame());
-	return glm::vec2(p.x, p.y);
-}
-
-// --------------------------------------------------
-void ofxFilter::add() {
-
-	// Progress forward one time step
-	kalmanPosition.predict();
-	kalmanOrientation.predict();
 }
 
 // --------------------------------------------------
@@ -183,6 +190,66 @@ void ofxFilter::add(glm::quat quaternion) {
 }
 
 // --------------------------------------------------
+void ofxFilter::add() {
+
+	// Increment the number of empty measurements
+	nEmptyMeasurements++;
+
+	// Predict, if it is on
+	switch (settings.predMode) {
+	case FILTER_PRED_NONE: {
+
+		// Do not make predictions
+
+	}; break;
+	case FILTER_PRED_KALMAN: {
+
+		// Predict using the regular kalman filter (predict one time step without an 
+		// actual measurement).
+		// This works well for a few frames, but quickly diverges after that.
+
+		kalmanPosition.predict();
+		kalmanOrientation.predict();
+
+	}; break;
+	case FILTER_PRED_ACC: default: {
+
+		// TODO: What motion parameters can be used for "FILTER_NONE"?
+
+		// Use the last observed parameters to begin predicting
+
+
+
+
+
+	}; break;
+	}
+
+
+}
+
+// --------------------------------------------------
+glm::mat4x4 ofxFilter::getFrame() {
+	return thisFrame;
+}
+
+// --------------------------------------------------
+float ofxFilter::getScalar() {
+	return getTranslation(getFrame()).x;
+}
+
+// --------------------------------------------------
+glm::vec3 ofxFilter::getPosition() {
+	return getTranslation(getFrame());
+}
+
+// --------------------------------------------------
+glm::vec2 ofxFilter::getPosition2D() {
+	auto p = getTranslation(getFrame());
+	return glm::vec2(p.x, p.y);
+}
+
+// --------------------------------------------------
 glm::quat ofxFilter::getOrientation() {
 	glm::mat4 m = getFrame();
 	glm::vec3 p;
@@ -190,5 +257,21 @@ glm::quat ofxFilter::getOrientation() {
 	decomposeMat4x4(m, p, q);
 	return q;
 }
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
 
 // --------------------------------------------------
