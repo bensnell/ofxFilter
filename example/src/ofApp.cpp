@@ -6,8 +6,8 @@ void ofApp::setup(){
 
 
 	ofxFilterSettings settings;
-	settings.kalmanSmoothness = 5;
-	settings.kalmanRapidness = 2;
+	settings.kalmanSmoothness = 2;
+	settings.kalmanRapidness = -1;
 	settings.bKalmanUseAccel = true;
 	settings.bKalmanUseJerk = false;
 	settings.predMode = ofxFilterPredMode::FILTER_PRED_ACC;
