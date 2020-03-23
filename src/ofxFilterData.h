@@ -11,7 +11,8 @@ public:
 	vector<glm::vec3> t;	// translation rate
 	vector<glm::vec3> r;	// rotation rate (euler angles)
 	vector<glm::vec3> s;	// scale rate
-	
+	int size() { return b.size(); }
+
 	void init(int size) {
 		b.clear();
 		b.resize(size, false);
@@ -23,8 +24,14 @@ public:
 		s.resize(size, { 0,0,0 });
 	}
 
-	int size() { return b.size(); }
-
+	
+	// Apply nFrames forward passes to update the rate
+	void forward(glm::mat4 m, int nFrames = 1);
+	// Backpropogate the rate to yield a prediction
+	void backward(int nFrames = 1);
+	
+	// Apply a frictional force
+	void applyFriction(float friction);
 
 };
 
@@ -37,32 +44,43 @@ public:
 	// Frame data
 	glm::mat4 m;
 
-	// Rate Parameters
-	mat4rate r;
-	void updateRate(int nElapsedFrames = 1);
-	void applyFriction(float friction); // one frame friction
-	// TODO: interleave friction with prediction?
-	bool predictFromRate(int nFrames = 1); // one frame prediction
-	bool setFromRate(); // set the transf matrix from the rate
-
-
 	// Set the transformation matrix
+	void set(glm::mat4 _m) { m = _m; }
 	void set(glm::vec3& translation, glm::quat& rotation, glm::vec3 scale) {
 		m = glm::translate(translation)* glm::toMat4(rotation)* glm::scale(scale);
 	}
 
 	// Get values from the transformation matrix
-	glm::vec3 getTranslation() { return { m[3][0], m[3][1], m[3][2] }; }
-	glm::quat getRotation() { return glm::quat_cast(m); }
-	glm::vec3 getScale() {
-		return glm::vec3(
-			glm::l2Norm(glm::vec3( m[0][0], m[0][1], m[0][2] )),
-			glm::l2Norm(glm::vec3( m[1][0], m[1][1], m[1][2] )),
-			glm::l2Norm(glm::vec3( m[2][0], m[2][1], m[2][2] )));
-	}
+	glm::vec3 translation();
+	glm::quat rotation();
+	glm::vec3 scale();
 
 	// Lerp to another data object
 	void lerp(ofxFilterData& to, float amt);
+
+	// Compare for similarity to another data object
+	bool similar(ofxFilterData& a, float et, float er, float es);
+
+	// Reconcile one piece of data with another
+	enum ReconciliationMode {
+		OFXFILTERDATA_RECONCILE_COPY_ALL = 0,
+		OFXFILTERDATA_RECONCILE_COPY_FRAME,
+		OFXFILTERDATA_RECONCILE_COPY_FRAME_AND_UPDATE_RATE,
+		NUM_OFXFILTERDATA_RECONCILE_MODES
+	};
+	vector<string> getReconciliationModes();
+	void reconcile(ofxFilterData& a, ReconciliationMode mode);
+
+	// ----------------------------
+
+	// Rate Parameters
+	mat4rate r;
+
+	// Update the rate (motion params), using internal frame data.
+	void updateRate(int nElapsedFrames = 1);
+	// Set the internal matrix from the rate
+	bool setFromRate();
+
 
 protected:
 

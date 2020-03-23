@@ -23,8 +23,12 @@ public:
 	// 3 = velocity, acceleration
 	// 4 = velocity, acceleration, jerk
 	int order = 3;
-
-	bool bResetRateAfterEmptyData = false;
+	
+	// After how many elapsed invalid frames should the rate be reset?
+	// 0	don't reset rate ever
+	// 1	reset rate after 1 empty frame
+	// n	reset rate after n empty frames
+	int nFramesToResetRate = 0;
 
 };
 
@@ -42,6 +46,6 @@ protected:
 
 	ofxFilterData lastData;
 
-	int nFramesSinceLastValidData = -1;
+	int nFramesSinceValidData = -1;
 
 };

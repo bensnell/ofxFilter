@@ -3,6 +3,9 @@
 // --------------------------------------------------
 void ofxFilterOpContinuitySettings::setupParams() {
 
+	RUI_SHARE_PARAM_WCN(getID() + "- Rate Order for Export", rateOrderToBeginExport, 0, 3);
+	RUI_SHARE_PARAM_WCN(getID() + "- Copy Linked Rate", bCopyLinkedRate);
+
 	RUI_SHARE_PARAM_WCN(getID() + "- Friction", friction, 0, 1);
 
 
@@ -14,96 +17,86 @@ void ofxFilterOpContinuity::setup(ofxFilterOpSettings* _settings) {
 
 	ofxFilterOp::setup(_settings);
 
-	// The data we predict from is initially invalid (until we see valid data)
-	//outData.bValid = false;
+	predData.bValid = false;
 
 }
 
 // --------------------------------------------------
 void ofxFilterOpContinuity::process(ofxFilterData& data) {
 	if (data.r.size() != 3) {
-		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params";
+		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";
+		return;
 	}
 
-	ofLogNotice("ofxFilter") << "Processing continuity";
-
+	// Get the settings for this operator
 	ofxFilterOpContinuitySettings* s = static_cast<ofxFilterOpContinuitySettings*>(settings);
 
-	// Rate should be calculated in the previous layer ("add-rate")
-
-
-	if (bLastDataValid && !data.bValid) {
-
-		if (obsAmt == 1.0) {
-			obsAmt = 0.0; // fully predicted data
-		}
-		else {
-		
-			// ? subtract 0.1 ?
-		
-		}
+	// If the observed data is valid and the required rate is present,
+	// then begin exporting data
+	if (data.bValid && data.r.b[min(s->rateOrderToBeginExport, data.r.size())]) {
+		bExporting = true;
 	}
-	bLastDataValid = data.bValid;
 
-
-	// If the data is valid and the output is fully observed data, then set the outData
-	// (this should happen at the beginning of every sequence)
-	if (data.bValid && obsAmt == 1.0) {
-		outData = data;
+	// If we're not exporting, mark output data as invalid
+	if (!bExporting) {
+		data.bValid = false;
+		return;
 	}
-	else {
 
-		// Begin with the last output params
-		tmpData = outData;
+	// We are currently exporting data
 
-		// TODO (?): Only fill holes that are large enough?
-
-		// If the data is invalid...
-		// Or if the mix is not fully observed...
-		// Then some prediction must be made.
-		
-		// TODO (?): If there is valid data, should the past motion params be interpolated?
-
-		// outData contains the most recent motion (rate) parameters
-
-		// First, apply friction to the parameters (one frame)
-		tmpData.applyFriction(s->friction); // TODO: don't apply friction if there is valid data
-		// Update the rate params (one frame)
-		tmpData.predictFromRate();
-		// Then, use outData to predict the current transformation matrix
-		tmpData.setFromRate();
+	if (bLinked) {
 
 		if (data.bValid) {
+			if (!predData.bValid) {
+				// Set the predicted data for the very first time
+				predData.bValid = true;
+				predData = data;
+			}
+			else {
 
-			// Update the mixture ratio betwen observed and predicted data
-			obsAmt = CLAMP(obsAmt + 0.001, 0, 1);
+				// What would the current prediction be if we proceed without observations?
+				tmpData = predData;
+				tmpData.r.backward();
+				tmpData.setFromRate();
 
-			// Interpolate this prediction to the actual one, accounting for the anticipated speed
-			tmpData.lerp(data, 0.01);
-
-			//outData = tmpData; // DOES NOT WORK 
-
-			// Correct the predData using this new measurement
-			outData.set(tmpData.getTranslation(), tmpData.getRotation(), tmpData.getScale());
-			// Regenerate motion parameters using this measurement ????
-			outData.updateRate();
-
-			// TODO: Should an acceleration be applied instead of lerping?
-
+				// If many frames have elapsed and the observed data differs significantly from 
+				// predicted data, then this can no longer be linked. Proceed to unlinked
+				// instructions
+				if (nFramesSinceObs > s->nFramesUnlinkThresh && !tmpData.similar(data, 1, 1, 1)) {
+					bLinked = false;
+				}
+				else {
+					// Reconcile new (known) data with previous (perhaps uncertain) data.
+					predData.reconcile(data, s->linkReconMode);
+				}
+			}
 		}
 		else {
-
-			// Last data was invalid, so continue using the last motion params
-			outData = tmpData;
-
+			// Backpropogate the rates to create a prediction
+			predData.r.backward();
+			// Set the frame from this prediction
+			predData.setFromRate();
 		}
+
+
+
+
+	}
+
+	if (!bLinked) {
+
+
+
 
 	}
 
 
-	// TODO: should data always be changed?
-	// TODO: should it always be valid?
 
+	// Increment the frames we've seen
+	nFramesSinceObs = data.bValid ? 1 : (nFramesSinceObs + 1);
+
+	// Output data is valid; save the output data
 	outData.bValid = true;
 	data = outData;
 }

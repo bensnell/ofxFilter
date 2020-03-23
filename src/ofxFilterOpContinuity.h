@@ -17,6 +17,26 @@ public:
 
 	void setupParams();
 
+	// At what rate order will we begin exporting?
+	// 0	at a position
+	// 1	at a velocity
+	// 2	at an acceleration
+	int rateOrderToBeginExport = 1;
+
+	// When the prediction is linked to observed, are the prediction's
+	// rates copied from the observation or derived from the 
+	// observation's frame only?
+	ofxFilterData::ReconciliationMode linkReconMode = ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL;
+
+	// After how many frames will the predictions and
+	// observations unlink?
+	int nFramesUnlinkThresh = 10;
+
+	// Should similarity be a factor in unlinking?
+	// TODO
+
+
+
 	// Friction applied to all rate parameters
 	// TODO (?): Applied differentially to higher-order rates?
 	float friction = 0.95;
@@ -33,19 +53,27 @@ public:
 	void process(ofxFilterData& data);
 
 
+
+
 protected:
 
-
-	ofxFilterData outData;
-	ofxFilterData tmpData;
-
-
-	// Mixture of predicted and observed data.
-	// 0.0 == 100% predicted data
-	// 1.0 == 100% observed data
-	float obsAmt = 1.0;
+	ofxFilterData predData;	// predicted data
+	ofxFilterData tmpData;	// temporary predicted data
+	ofxFilterData outData;	// output data (final)
 
 
+	// Is this operator currently exporting data (valid data)?
+	bool bExporting = false;
 
-	bool bLastDataValid = false;
+	// Is the prediction currently linked to output?
+	// If true, then there is no prediction underway. The output is the 
+	// observation.
+	bool bLinked = true;
+
+	// Number of frames since the last observation
+	int nFramesSinceObs = 1;
+
+
+
+
 };

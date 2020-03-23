@@ -6,7 +6,7 @@ void ofxFilterOpAddRateSettings::setupParams() {
 	// Don't create a new group, just add on params
 
 	RUI_SHARE_PARAM_WCN(getID() + "- Order", order, 1, 4);
-	RUI_SHARE_PARAM_WCN(getID() + "- Reset After Empty", bResetRateAfterEmptyData);
+	RUI_SHARE_PARAM_WCN(getID() + "- Frames to Reset", nFramesToResetRate, 0, 120);
 
 }
 
@@ -26,20 +26,20 @@ void ofxFilterOpAddRate::process(ofxFilterData& data) {
 	if (data.r.size() != s->order) {
 		data.r.init(s->order);
 	}
-	else if (data.bValid && !lastData.bValid && s->bResetRateAfterEmptyData) {
+	else if (data.bValid && !lastData.bValid && (s->nFramesToResetRate > nFramesSinceValidData)) {
 		data.r.init(s->order);
 	}
 
 	// Update the rate parameters if available (using the most recent data)
 	if (data.bValid) {
 	
-		if (nFramesSinceLastValidData < 0) nFramesSinceLastValidData = 1;
+		if (nFramesSinceValidData < 0) nFramesSinceValidData = 1;
 
-		data.updateRate(nFramesSinceLastValidData);
-		nFramesSinceLastValidData = 0;
+		data.updateRate(nFramesSinceValidData);
+		nFramesSinceValidData = 0;
 	}
 
-	if (nFramesSinceLastValidData >= 0) nFramesSinceLastValidData++;
+	if (nFramesSinceValidData >= 0) nFramesSinceValidData++;
 	lastData = data;
 }
 
