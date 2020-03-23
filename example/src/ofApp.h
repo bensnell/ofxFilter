@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxFilter.h"
+#include "ofxFilterGroup.h"
 #include "ofxRemoteUIServer.h"
 
 class ofApp : public ofBaseApp{
@@ -23,12 +23,14 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		ofxFilter filter;
+		//ofxFilter filter;
 		
 		bool bMousePressed = false;
 
 		ofPolyline line;
 
 		bool bFilterActive = false;
+
+		ofxFilterGroup filters;
 
 };

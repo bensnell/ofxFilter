@@ -1,0 +1,25 @@
+<OFX_REMOTE_UI>
+	<OFX_REMOTE_UI_V>2</OFX_REMOTE_UI_V>
+	<OFX_REMOTE_UI_PARAMS>
+		<!-- # ofxFilterGroup - mouse ################################################################################# -->
+		<P name="ofxFilterGroup - mouse" type="group" />
+		<P name="FG_mouse- opList" type="string">easing,add-rate,continuity</P>
+		<P name="FG_mouse_easing_0- Easing Param" type="float">0.942501</P>
+		<P name="FG_mouse_add-rate_1- Order" type="int">3</P>
+		<P name="FG_mouse_add-rate_1- Reset After Empty" type="bool">0</P>
+		<P name="FG_mouse_continuity_2- Friction" type="float">0.98</P>
+		<!--                                                                                                  -->
+		<!-- ###################################### DISABLED PARAMS ######################################### -->
+		<!--                                                                                                  -->
+		<P name="FG_mouse_kalman_0- Smoothness" type="float" disabled="1">3</P>
+		<P name="FG_mouse_kalman_0- Rapidness" type="float" disabled="1">1</P>
+		<P name="FG_mouse_kalman_0- Use Accel" type="bool" disabled="1">1</P>
+		<P name="FG_mouse_kalman_0- Use Jerk" type="bool" disabled="1">0</P>
+		<P name="FG_mouse_kalman_0- Predict Empty" type="bool" disabled="1">1</P>
+		<P name="FG_mouse_kalman_0- Max Empty Pred" type="int" disabled="1">10</P>
+		<P name="FG_mouse_kalman_0- Reset After Empty" type="bool" disabled="1">1</P>
+		<P name="FG_mouse_easing_1- Easing Param" type="float" disabled="1">0.8</P>
+	</OFX_REMOTE_UI_PARAMS>
+	<OFX_REMOTE_UI_SERVER_PORT>51293</OFX_REMOTE_UI_SERVER_PORT>
+	<OFX_REMOTE_UI_SERVER_ENABLED>1</OFX_REMOTE_UI_SERVER_ENABLED>
+</OFX_REMOTE_UI>

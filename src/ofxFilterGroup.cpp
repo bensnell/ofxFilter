@@ -1,10 +1,3 @@
-//
-//  ofxFilterGroup.cpp
-//  g5_002
-//
-//  Created by Ben Snell on 1/17/19.
-//
-
 #include "ofxFilterGroup.h"
 
 // --------------------------------------------------
@@ -18,33 +11,53 @@ ofxFilterGroup::~ofxFilterGroup() {
 }
 
 // --------------------------------------------------
-void ofxFilterGroup::setupParams(string name) {
-	groupName = name;
+void ofxFilterGroup::setup(string _name, string _opList) {
 
-	ruiGroupName = "Filter Group- " + groupName;
+	// Create a group for all of the parameters
+	name = _name;
+	ruiGroupName = "ofxFilterGroup - " + name;
+	string logPrefix = "FG_" + name;
+	opList = _opList;
 	RUI_NEW_GROUP(ruiGroupName);
-	string modeNames[] = { "None", "Kalman" }; //, "Easing" };
-	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Mode", settings.mode, FILTER_NONE, NUM_FILTER_MODES-1, modeNames);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Smoothness", settings.kalmanSmoothness, 0, 12);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Rapidness", settings.kalmanRapidness, 0, 12);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Use Accel", settings.bKalmanUseAccel);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Kalman Use Jerk", settings.bKalmanUseJerk);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Easing Param", settings.easingParam, 0, 1);
+	RUI_SHARE_PARAM_WCN("FG_" + name + "- " + "opList", opList);
 
-	string predNames[] = { "None", "Kalman", "Acc" };
-	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Pred Mode", settings.predMode, FILTER_PRED_NONE, NUM_FILTER_PRED_MODES-1, predNames);
-	//RUI_SHARE_PARAM_WCN("FG" + name + "- Pred Delay", settings.predDelay, 0, 20);
+	// Now that the operator list is loaded, create a list of settings
+	// and initialize the parameters of these settings.
+	vector<string> opListParsed = ofSplitString(opList, ",");
+	opSettings.clear();
+	int depth = -1;
+	for (int i = 0; i < opListParsed.size(); i++) {
+		string type = ofToLower(opListParsed[i]);
+		depth++;
 
-	string postNames[] = { "None", "Easing" };
-	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Post Mode", settings.postMode, FILTER_POST_NONE, NUM_FILTER_POST_MODES-1, postNames);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Post Easing Param", settings.postEasingParam, 0, 1);
-
-}
-
-// --------------------------------------------------
-void ofxFilterGroup::setup() {
-
-	updateAllParams();
+		ofxFilterOpSettings* settings;
+		if (type == "none") {
+			settings = new ofxFilterOpSettings();
+		}
+		else if (type == "easing") {
+			settings = new ofxFilterOpEasingSettings();
+		}
+		else if (type == "kalman") {
+			settings = new ofxFilterOpKalmanSettings();
+		}
+		else if (type == "add-rate") {
+			settings = new ofxFilterOpAddRateSettings();
+		}
+		else if (type == "continuity") {
+			// This must follow an "add-rate"
+			if (i == 0 || ofToLower(opListParsed[i - 1]) != "add-rate") {
+				ofLogWarning("ofxFilterGroup") << "Continuity operators must follow Add-Rate";
+			}
+			settings = new ofxFilterOpContinuitySettings();
+		}
+		else {
+			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
+			depth--;
+			continue;
+		}
+		settings->setup(logPrefix, depth);
+		opSettings.push_back(settings);
+	}
 
 	ofAddListener(RUI_GET_OF_EVENT(), this, &ofxFilterGroup::paramsUpdated);
 
@@ -53,18 +66,18 @@ void ofxFilterGroup::setup() {
 // --------------------------------------------------
 ofxFilter* ofxFilterGroup::getFilter(string key, bool bCreateIfNone) {
 
-	if (filters.find(key) == filters.end()) {
-		if (!bCreateIfNone) return NULL;
-
-		// couldn't find it; create a new one
-		ofxFilter* f = new ofxFilter();
-		// Update params
-		f->setParams(settings);
-		f->setup();
-		// Save the filter
-		filters[key] = f;
+	if (filterExists(key)) {
+		return filters[key];
 	}
-	return filters[key];
+	else if (bCreateIfNone) {
+		ofxFilter* filter = new ofxFilter();
+		filter->setup(opSettings);
+		filters[key] = filter;
+		ofLogNotice() << "Creating filter " << key << " with address " << filters[key];
+		return filters[key];
+	}
+
+	return NULL;
 }
 
 // --------------------------------------------------
@@ -78,15 +91,7 @@ void ofxFilterGroup::paramsUpdated(RemoteUIServerCallBackArg& arg) {
 	if (arg.action != CLIENT_UPDATED_PARAM) return;
 	if (arg.group.compare(ruiGroupName) != 0) return;
 
-	updateAllParams();
-}
-
-// --------------------------------------------------
-void ofxFilterGroup::updateAllParams() {
-
-	for (auto it = filters.begin(); it != filters.end(); it++) {
-		it->second->setParams(settings);
-	}
+	// TODO?
 }
 
 // --------------------------------------------------

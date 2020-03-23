@@ -4,17 +4,31 @@
 void ofApp::setup(){
 	ofSetFrameRate(60);
 
+	// Load the RUI database from file
+	RUI_SET_CONFIGS_DIR("configs");
+	RUI_SETUP();
+	RUI_LOAD_FROM_XML();
 
-	ofxFilterSettings settings;
-	settings.kalmanSmoothness = 2;
-	settings.kalmanRapidness = -1;
-	settings.bKalmanUseAccel = true;
-	settings.bKalmanUseJerk = false;
-	settings.predMode = ofxFilterPredMode::FILTER_PRED_ACC;
-	settings.postMode = ofxFilterPostMode::FILTER_POST_EASING;
+	// Setup the filter group
+	filters.setup("mouse", "easing");
+	filters.getFilter("myMouse");
 
-	filter.setParams(settings);
-	filter.setup();
+
+	// Setup the RUI
+
+
+
+
+	//ofxFilterSettings settings;
+	//settings.kalmanSmoothness = 2;
+	//settings.kalmanRapidness = -1;
+	//settings.bKalmanUseAccel = true;    
+	//settings.bKalmanUseJerk = false;
+	//settings.predMode = ofxFilterPredMode::FILTER_PRED_ACC;
+	//settings.postMode = ofxFilterPostMode::FILTER_POST_EASING;
+
+	//filter.setParams(settings);
+	//filter.setup();
 
 }
 
@@ -26,14 +40,15 @@ void ofApp::update(){
 		// Add a measurement
 		if (bMousePressed) {
 			float rad = 5;
-			filter.add(glm::vec2(ofGetMouseX()+ofRandom(-rad,rad), ofGetMouseY()+ofRandom(-rad,rad)));
+			glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
+			filters.getFilter("myMouse")->process(position);
 		}
 		else {
-			filter.add();
+			filters.getFilter("myMouse")->process();
 		}
 
 		// Make a prediction
-		glm::vec2 pred = filter.getPosition2D();
+		glm::vec2 pred = filters.getFilter("myMouse")->getPosition2D();
 		line.addVertex(pred.x, pred.y, 0);
 	}
 
