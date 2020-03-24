@@ -6,13 +6,7 @@ void mat4rate::forward(glm::mat4 _m, int nElapsedFrames) {
 	// Calculate the current euler angle (warping to correct dimension)
 	glm::vec3 euler = glm::eulerAngles(getRotation(_m));
 	if (size() > 0 && b[0]) {
-		glm::vec3 eulerPrev = r[0];
-		for (int i = 0; i < 3; i++) {
-			float rev = floorf((eulerPrev[i] + 180) / 360.f) * 360;
-			euler[i] += rev;
-			if (euler[i] < -90 + rev && eulerPrev[i] > 90 + rev) euler[i] += 360;
-			else if (euler[i] > 90 + rev && eulerPrev[i] < -90 + rev) euler[i] -= 360;
-		}
+		euler = getEulerWarped(euler, r[0]);
 	}
 
 	// Update rates
@@ -82,16 +76,67 @@ void mat4rate::backward(int nFrames) {
 			s[i] += s[i + 1];
 		}
 	}
+
+	// TODO: Should rotations be normalized after back propogation?
 }
 
 // --------------------------------------------------
-void ofxFilterData::updateRate(int nElapsedFrames) {
+bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
+
+	// TODO: Check to make sure rates are valid (and there are enough of them)
+	if (r.size() < 3 || to.r.size() < 3 || !r.isOrderValid(2) || !to.r.isOrderValid(1)) return false;
+
+	for (int i = 0; i < 3; i++) {
+
+		// First, find the vector to the target
+		glm::vec3 heading;
+		if (i == 1) { // rotation
+			heading = getEulerWarped(to.r[i][0], r[i][0]) - r[i][0];
+		}
+		else {
+			heading = to.r[i][0] - r[i][0];
+		}
+
+		// Next, determine approximately how long it would take to approach the target.
+		float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
+		float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
+		float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][0]))) / p.frameRate;
+
+		// Determine the target speed
+		float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
+		float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
+		float targetSpeed = ofLerp(glm::l2Norm(to.r[i][1]), maxSpeedPerFrame, paramToMaxSpeed);
+
+		// Determine the target velocity
+		glm::vec3 targetVel = glm::normalize(heading)* targetSpeed;
+
+		// Determine the target acceleration
+		glm::vec3 targetAcc = targetVel - r[i][1];
+
+		// Calculate the required jerk
+		glm::vec3 targetJerk = targetAcc - r[i][2];
+		float maxAccStepPerFrame = p.maxSpeed[i] / pow(p.frameRate, p.accStepPower);
+		float jerkMagnitude = min(glm::l2Norm(targetJerk), maxAccStepPerFrame);
+		glm::vec3 jerk = glm::normalize(targetJerk) * jerkMagnitude;
+
+		// Calculate the new (adjusted) accleration that would be required to
+		// produce the motion we desire (convergence on the target frame) and set it.
+		r[i][2] = r[i][2] + jerk;
+	}
+
+	// TODO: Should they converge evenly?
+
+	return true;
+}
+
+// --------------------------------------------------
+void ofxFilterData::updateRateFromFrame(int nElapsedFrames) {
 
 	r.forward(m, nElapsedFrames);
 }
 
 // --------------------------------------------------
-bool ofxFilterData::setFromRate() {
+bool ofxFilterData::setFrameFromRate() {
 
 	if (r.size() < 1 || !r.b[0]) return false;
 
@@ -160,7 +205,7 @@ void ofxFilterData::reconcile(ofxFilterData& a, ReconciliationMode mode) {
 
 		bValid = a.bValid;
 		m = a.m;
-		updateRate();
+		updateRateFromFrame();
 
 	}; break;
 	case ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL: default: {
@@ -178,8 +223,66 @@ void ofxFilterData::reconcile(ofxFilterData& a, ReconciliationMode mode) {
 
 	}; break;
 	}
-
 }
+
+// --------------------------------------------------
+bool ofxFilterData::similar(ofxFilterData& a, SimilarityParams& p) {
+
+	// Are this data and the other data similar?
+
+	float mix = 0;
+	int nOrders = min(min(p.nRates, r.size()), a.r.size());
+	for (int order = 0; order < nOrders; order++) {
+
+		// Calculate the differences (l2 distances)
+		glm::vec3 diff;
+		if (order == 0) {
+			// Look at the frame
+
+			// Calculate the difference in translation.
+			diff[0] = glm::l2Norm(translation(), a.translation());
+
+			// Calculate the difference in rotation.
+			// This should be done with angle() and axisAngle() of quats, but for
+			// ease, we will use euler angles.
+			// Warp the euler angles so they traverse the shortest path.
+			glm::vec3 euler = glm::eulerAngles(rotation());
+			glm::vec3 refEuler = glm::eulerAngles(a.rotation());
+			euler = getEulerWarped(euler, refEuler);
+			// Calc the difference
+			diff[1] = glm::l2Norm(euler, refEuler);
+
+			// Calculate the difference in scale.
+			diff[2] = glm::l2Norm(scale(), a.scale());
+		}
+		else {
+			// Look at the rates
+
+			// Only proceed if valid
+			if (!r.b[0] || !a.r.b[0]) continue;
+
+			diff[0] = glm::l2Norm(r.t[order], a.r.t[order]);
+			diff[1] = glm::l2Norm(r.r[order], a.r.r[order]);
+			diff[2] = glm::l2Norm(r.s[order], a.r.s[order]);
+		}
+
+		// Apply the thresholds and sum them up
+		for (int i = 0; i < 3; i++) {
+			mix += log(diff[i] / (p.thresh[i] * pow(p.rateThreshMult, order))) * p.mix[i] * pow(2.0, -order * p.rateWeight);
+		}
+	}
+
+	// The frames are similar if the mixture is less or equal to 0
+	return mix <= 0.0;
+}
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
+
+// --------------------------------------------------
 
 // --------------------------------------------------
 

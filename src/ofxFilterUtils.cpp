@@ -43,3 +43,14 @@ glm::vec3 getYAxis(glm::mat4x4& a) {
 glm::vec3 getZAxis(glm::mat4x4& a) {
 	return glm::vec3(a[2][0], a[2][1], a[2][2]);
 }
+
+glm::vec3 getEulerWarped(glm::vec3 euler, glm::vec3 refEuler) {
+
+	for (int i = 0; i < 3; i++) {
+		float rev = floorf((refEuler[i] + 180) / 360.f) * 360;
+		euler[i] += rev;
+		if (euler[i] < -90 + rev && refEuler[i] > 90 + rev) euler[i] += 360;
+		else if (euler[i] > 90 + rev && refEuler[i] < -90 + rev) euler[i] -= 360;
+	}
+	return euler;
+}

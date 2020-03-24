@@ -54,9 +54,9 @@ void ofxFilterOpKalman::process(ofxFilterData& data) {
 	}
 	else {
 		// Add a new measurement to all filters
-		kt.update(data.getTranslation());
-		kr.update(data.getRotation());
-		ks.update(data.getScale());
+		kt.update(data.translation());
+		kr.update(data.rotation());
+		ks.update(data.scale());
 
 		nEmptyPred = 0;
 	}

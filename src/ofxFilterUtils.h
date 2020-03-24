@@ -13,3 +13,11 @@ glm::vec3 getScale(glm::mat4x4& m);
 glm::vec3 getXAxis(glm::mat4x4& a);
 glm::vec3 getYAxis(glm::mat4x4& a);
 glm::vec3 getZAxis(glm::mat4x4& a);
+
+// Calculate a euler angle, wrapped to the correct dimension,
+// given the previous reference euler angle.
+// For example, if the previous pitch (refEuler[1]) is -175, and the next
+// pitch (euler[1]) is 175, we would assume that the rotation
+// took the shortest path possible, in which case the "real" 
+// pitch (to output) would be -185.
+glm::vec3 getEulerWarped(glm::vec3 euler, glm::vec3 refEuler);

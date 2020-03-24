@@ -35,7 +35,7 @@ void ofxFilterOpAddRate::process(ofxFilterData& data) {
 	
 		if (nFramesSinceValidData < 0) nFramesSinceValidData = 1;
 
-		data.updateRate(nFramesSinceValidData);
+		data.updateRateFromFrame(nFramesSinceValidData);
 		nFramesSinceValidData = 0;
 	}
 

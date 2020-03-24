@@ -6,11 +6,33 @@
 		<P name="FG_mouse- opList" type="string">easing,add-rate,continuity</P>
 		<P name="FG_mouse_easing_0- Easing Param" type="float">0.942501</P>
 		<P name="FG_mouse_add-rate_1- Order" type="int">3</P>
-		<P name="FG_mouse_add-rate_1- Reset After Empty" type="bool">0</P>
+		<P name="FG_mouse_add-rate_1- Frames to Reset" type="int">0</P>
+		<P name="FG_mouse_continuity_2- Max Pred Frames" type="int">240</P>
+		<P name="FG_mouse_continuity_2- Rate Order for Export" type="int">1</P>
+		<P name="FG_mouse_continuity_2- Linked Recon Mode" type="enum">0</P>
+		<P name="FG_mouse_continuity_2- Frames to Unlink" type="int">10</P>
+		<P name="FG_mouse_continuity_2- Sim Trans Thresh" type="float">0.01</P>
+		<P name="FG_mouse_continuity_2- Sim Trans Mix" type="float">1</P>
+		<P name="FG_mouse_continuity_2- Sim Rot Thresh" type="float">3</P>
+		<P name="FG_mouse_continuity_2- Sim Rot Mix" type="float">0</P>
+		<P name="FG_mouse_continuity_2- Sim Scale Thresh" type="float">0.01</P>
+		<P name="FG_mouse_continuity_2- Sim Scale Mix" type="float">0</P>
+		<P name="FG_mouse_continuity_2- Sim Num Rates" type="int">1</P>
+		<P name="FG_mouse_continuity_2- Sim Rate Thresh Mult" type="float">10</P>
+		<P name="FG_mouse_continuity_2- Sim Rate Weight" type="float">0</P>
 		<P name="FG_mouse_continuity_2- Friction" type="float">0.98</P>
+		<P name="FG_mouse_continuity_2- Lookahead Frames" type="int">1</P>
+		<P name="FG_mouse_continuity_2- Conv FPS" type="float">240</P>
+		<P name="FG_mouse_continuity_2- Conv Max Trans Speed" type="float">1</P>
+		<P name="FG_mouse_continuity_2- Conv Max Rot Speed" type="float">90</P>
+		<P name="FG_mouse_continuity_2- Conv Max Scale Speed" type="float">1</P>
+		<P name="FG_mouse_continuity_2- Conv Approach Time" type="float">1</P>
+		<P name="FG_mouse_continuity_2- Conv Approach Buf" type="float">0.05</P>
+		<P name="FG_mouse_continuity_2- Conv Acc Step Power" type="float">2</P>
 		<!--                                                                                                  -->
 		<!-- ###################################### DISABLED PARAMS ######################################### -->
 		<!--                                                                                                  -->
+		<P name="FG_mouse_add-rate_1- Reset After Empty" type="bool" disabled="1">0</P>
 		<P name="FG_mouse_kalman_0- Smoothness" type="float" disabled="1">3</P>
 		<P name="FG_mouse_kalman_0- Rapidness" type="float" disabled="1">1</P>
 		<P name="FG_mouse_kalman_0- Use Accel" type="bool" disabled="1">1</P>
