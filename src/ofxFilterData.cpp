@@ -109,22 +109,28 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 		// If the heading is too small, then skip
 		float epsilon = glm::l2Norm(heading);
 		if (epsilon < pow(10, -p.epsilonPower)) continue;
+        
+        ofLogNotice("FD") << "\t\tHeading\t\t\t" << heading;
 
 		// Next, determine approximately how long it would take to approach the target.
 		float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
 		float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
-		float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][0]))) / p.frameRate;
+		float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
+        ofLogNotice("FD") << "\t\tTime to Target\t" << timeToTarget;
 
 		// Determine the target speed
 		float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
 		float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
 		float targetSpeed = ofLerp(glm::l2Norm(to.r[i][1]), maxSpeedPerFrame, paramToMaxSpeed);
-
+        ofLogNotice("FD") << "\t\tTarget Speed\t" << targetSpeed << "\tto: " << glm::l2Norm(to.r[i][1]) << "\t maxPerFrame: " << maxSpeedPerFrame << "\tparam: " << paramToMaxSpeed;
+        
 		// Determine the target velocity
 		glm::vec3 targetVel = glm::normalize(heading)* targetSpeed;
+        ofLogNotice("FD") << "\t\tTarget Vel\t\t" << targetVel;
 
 		// Determine the target acceleration
 		glm::vec3 targetAcc = targetVel - r[i][1];
+        ofLogNotice("FD") << "\t\tTarget Acc\t\t" << targetAcc;
 
 		// Calculate the required jerk
 		glm::vec3 targetJerk = targetAcc - r[i][2];
@@ -281,7 +287,7 @@ bool ofxFilterData::similar(ofxFilterData& a, SimilarityParams& p) {
 
 		// Apply the thresholds and sum them up
 		for (int i = 0; i < 3; i++) {
-			mix += log(diff[i] / (p.thresh[i] * pow(p.rateThreshMult, order))) * p.mix[i] * pow(2.0, -order * p.rateWeight);
+            mix += diff[i] == 0.0 ? 0.0 : (log(diff[i] / (p.thresh[i] * pow(p.rateThreshMult, order))) * p.mix[i] * pow(2.0, -order * p.rateWeight));
 		}
 	}
 

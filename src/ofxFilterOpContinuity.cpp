@@ -44,7 +44,14 @@ void ofxFilterOpContinuity::setup(ofxFilterOpSettings* _settings) {
 void ofxFilterOpContinuity::process(ofxFilterData& data) {
 
 	ofLogNotice("OC") << "\n\n================================ Frame " << ofGetFrameNum();
-	ofLogNotice("OC") << "Input data consists of:\n\t" << data.translation() << " " << data.bValid << "\t\t" << data.r[0][1] << "\t\t" << data.r[0][2];
+    if (data.bValid) {
+        string speed = data.r.isOrderValid(1) ? ofToString(glm::l2Norm(data.r[0][1])) : "--";
+        ofLogNotice("OC") << "\tObserved Pos:\t" << data.translation() << "\tspeed: " << speed; // << "\tv: " << data.r[0][1] << "\ta: " << data.r[0][2];
+        speed = predData.r.isOrderValid(1) ? ofToString(glm::l2Norm(predData.r[0][1])) : "--";
+        ofLogNotice("OC") << "\tLast Pos    :\t" << predData.translation() << "\tspeed: " << speed; // << "\tv: " << predData.r[0][1] << "\ta: " << predData.r[0][2];
+    } else {
+        ofLogNotice("OC") << "No observed data";
+    }
 
 	if (data.r.size() != 3) {
 		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";
@@ -75,8 +82,8 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 		}
 	}
 
-	if (bExporting) ofLogNotice("OC") << "We are currently exporting";
-	else ofLogNotice("OC") << "We are NOT exporrting.";
+    if (bExporting) ofLogNotice("OC") << "We are currently exporting";
+    else ofLogNotice("OC") << "We are NOT exporrting.";
 
 	// If we're not exporting, mark output data as invalid
 	if (!bExporting) {
@@ -93,7 +100,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				// Set the predicted data for the very first time
 				bSetFirstPred = true;
 				predData = data;
-				ofLogNotice("OC") << "Set first prediction";
+                ofLogNotice("OC") << "Set first prediction";
 			}
 			else {
 
@@ -103,20 +110,20 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				tmpData.r.backward();
 				tmpData.setFrameFromRate();
 
-				ofLogNotice("OC") << "Calc linked prediction " << tmpData.translation();
+                ofLogNotice("OC") << "Calc linked prediction " << tmpData.translation();
 
 				// If many frames have elapsed and the observed data differs significantly from 
 				// predicted data, then this can no longer be linked. Proceed to unlinked
 				// instructions
 				if (nFramesSinceObs > s->nFramesUnlinkThresh && !tmpData.similar(data, s->simParams)) {
 					bLinked = false;
-					ofLogNotice("OC") << "Too dissimilar and over num frames for linkage. Stopping linkage";
+                    ofLogNotice("OC") << "Too dissimilar and over num frames for linkage. Stopping linkage";
 				}
 				else {
 					// Reconcile new (known) data with previous (perhaps uncertain) data.
 					predData.reconcile(data, s->existingLinkReconMode);
 
-					ofLogNotice("OC") << "Within linking window. Reconciling: " << predData.translation();
+                    ofLogNotice("OC") << "Within linking window. Reconciling: " << predData.translation();
 				}
 			}
 		}
@@ -125,7 +132,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			// Stop linking if we are over threshold
 			if (nFramesSinceObs > s->nFramesUnlinkThresh) {
 				bLinked = false;
-				ofLogNotice("OC") << "Stopping linkage. Over frame threshold.";
+                ofLogNotice("OC") << "Stopping linkage. Over frame threshold.";
 			}
 			else {
 				// Apply friction
@@ -135,55 +142,44 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				// Set the frame from this prediction
 				predData.setFrameFromRate();
 
-				ofLogNotice("OC") << "Invalid data during linkage. Making prediction... " << predData.translation();
+                ofLogNotice("OC") << "Invalid data during linkage. Making prediction... " << predData.translation() << "\t" << predData.r[0][1] << "\t" << predData.r[0][2];
 			}
 		}
 	}
 
 	if (!bLinked) {
 
-		ofLogNotice("OC") << "We are NOT linked.";
-
+        ofLogNotice("OC") << "We are not linked.";
+        
 		if (data.bValid) {
 			// Valid data coming in that must be reconciled with
-
-			ofLogNotice("OC") << "Valid data... attempt to converge";
+            
+            ofLogNotice("OC") << "There is valid data.";
 			
 			// Look ahead a number of frames to find the likely observed point
 			// that we will attempt to converge onto
 			tmpData = data;
 			for (int i = 0; i < s->nLookaheadFrames; i++) {
+                tmpData.r.applyFriction(s->friction, s->frictionPower);
 				tmpData.r.backward();
 				if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
 			}
-			ofLogNotice("OC") << "We are converging toward " << tmpData.translation();
+            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation() << " with speed " << glm::l2Norm(tmpData.r[0][1]);
 
 			// Converge the rates to this frame
 			tmpData2 = predData;
-			tmpData2.converge(tmpData, s->convParams); // What if they are the same? Look at logs (TODO)
+            if (!tmpData2.converge(tmpData, s->convParams)) {
+                // If convergence is not possible, proceed as if it were,
+                // using the tmpData to generate a prediction.
+            }
 
-			ofLogNotice("OC") << "After converging, rates go from: ";
-			for (int j = 0; j < tmpData2.r.size(); j++) {
-				ofLogNotice("OC") << "\t" << predData.r[0][j] << "\t--->---\t" << tmpData2.r[0][j] << "\t--->---\t" << tmpData.r[0][j];
-			}
-
-			ofLogNotice("OC") << "TmpData2: " << tmpData2.translation();
-			for (int j = 0; j < tmpData2.r.size(); j++) {
-				ofLogNotice("OC") << "\t" << tmpData2.r[0][j];
-			}
 			// Generate a prediction and set this frame
 			tmpData2.r.backward();
-			ofLogNotice("OC") << "TmpData2: " << tmpData2.translation();
-			for (int j = 0; j < tmpData2.r.size(); j++) {
-				ofLogNotice("OC") << "\t" << tmpData2.r[0][j];
-			}
 			tmpData2.setFrameFromRate();
-			ofLogNotice("OC") << "TmpData2: " << tmpData2.translation();
-			for (int j = 0; j < tmpData2.r.size(); j++) {
-				ofLogNotice("OC") << "\t" << tmpData2.r[0][j];
-			}
-
-			ofLogNotice("OC") << "Pred after convergence is " << tmpData2.translation();
+            
+            ofLogNotice("OC") << "\tAcc was " << predData.r[0][2] << " and is now " << tmpData2.r[0][2];
+            ofLogNotice("OC") << "\tVel was " << predData.r[0][1] << " and is now " << tmpData2.r[0][1];
+            ofLogNotice("OC") << "\tPos was " << predData.r[0][0] << " and is now " << tmpData2.r[0][0];
 
 			// Compare with the observed data
 			if (tmpData2.similar(data, s->simParams)) {
@@ -202,7 +198,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				// We have been operating on our predictions all along
 				predData = tmpData2;
 
-				ofLogNotice("OC") << "Converged data is not similar enough yet... continue on predicting";
+				ofLogNotice("OC") << "Converged data is not similar enough... continue predicting";
 			}
 		}
 		else {
@@ -211,7 +207,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			predData.r.backward();
 			predData.setFrameFromRate();
 
-			ofLogNotice("OC") << "There is no valid data, so predict... " << predData.translation();
+            ofLogNotice("OC") << "Prediction: " << predData.translation() << "\t" << predData.r[0][1] << "\t" << predData.r[0][2];
 		}
 	}
 

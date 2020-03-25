@@ -25,10 +25,10 @@ public:
 	int order = 3;
 	
 	// After how many elapsed invalid frames should the rate be reset?
-	// 0	don't reset rate ever
+	// -1	don't reset rate ever
 	// 1	reset rate after 1 empty frame
 	// n	reset rate after n empty frames
-	int nFramesToResetRate = 0;
+	int nFramesToResetRate = 3;
 
 	// How much do we ease high order (2+) rates?
 	// Sometimes, there can be noise in high order rates that
@@ -54,8 +54,10 @@ public:
 
 protected:
 
-	ofxFilterData lastData;
+    bool bLastDataValid = false;
+    
+	ofxFilterData lastValidData;
 
-	int nFramesSinceValidData = -1;
+	int nFramesSinceValidData = 1;
 
 };
