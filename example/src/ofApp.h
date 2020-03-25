@@ -27,10 +27,12 @@ class ofApp : public ofBaseApp{
 		
 		bool bMousePressed = false;
 
-		ofPolyline line;
+		vector<ofPolyline> lines;
 
 		bool bFilterActive = false;
 
 		ofxFilterGroup filters;
+
+		bool bLastValid = true;
 
 };

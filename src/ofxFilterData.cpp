@@ -1,7 +1,7 @@
 #include "ofxFilterData.h"
 
 // --------------------------------------------------
-void mat4rate::forward(glm::mat4 _m, int nElapsedFrames) {
+void mat4rate::forward(glm::mat4 _m, int nElapsedFrames, float easeParam) {
 
 	// Calculate the current euler angle (warping to correct dimension)
 	glm::vec3 euler = glm::eulerAngles(getRotation(_m));
@@ -25,16 +25,22 @@ void mat4rate::forward(glm::mat4 _m, int nElapsedFrames) {
 			swap(_s, s[i]);
 		}
 		else {
+
+			// TODO:
+			// Should rates be eased incrementally, so higher order rates change slower? (mix now)
+			// Or should rates change at the same time, so all rates change the same amount? 
+			//	(mix applied after ALL updates)
+
 			tmp = t[i];
-			t[i] = (t[i - 1] - _t) / div;
+			t[i] = glm::mix((t[i - 1] - _t) / div, t[i], easeParam);
 			_t = tmp;
 
 			tmp = r[i];
-			r[i] = (r[i - 1] - _r) / div;
+			r[i] = glm::mix((r[i - 1] - _r) / div, r[i], easeParam);
 			_r = tmp;
 
 			tmp = s[i];
-			s[i] = (s[i - 1] - _s) / div;
+			s[i] = glm::mix((s[i - 1] - _s) / div, s[i], easeParam);
 			_s = tmp;
 		}
 
@@ -46,7 +52,7 @@ void mat4rate::forward(glm::mat4 _m, int nElapsedFrames) {
 }
 
 // --------------------------------------------------
-void mat4rate::applyFriction(float friction) {
+void mat4rate::applyFriction(float friction, float ratePower) {
 
 	// Don't apply friction to lowest-order parameters (skip 0)
 	for (int i = 1; i < size(); i++) {
@@ -54,9 +60,9 @@ void mat4rate::applyFriction(float friction) {
 		// Don't apply friction to parameters that don't exist yet
 		if (!b[i]) break;
 		
-		t[i] *= friction;
-		r[i] *= friction;
-		s[i] *= friction;
+		for (int j = 0; j < 3; j++) {
+			(*this)[j][i] *= pow(friction, pow(ratePower, i - 1));
+		}
 	}
 }
 
@@ -88,6 +94,9 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 
 	for (int i = 0; i < 3; i++) {
 
+		// If FROM and TO frames are the same, then skip
+		if (m == to.m) continue;
+
 		// First, find the vector to the target
 		glm::vec3 heading;
 		if (i == 1) { // rotation
@@ -96,6 +105,10 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 		else {
 			heading = to.r[i][0] - r[i][0];
 		}
+
+		// If the heading is too small, then skip
+		float epsilon = glm::l2Norm(heading);
+		if (epsilon < pow(10, -p.epsilonPower)) continue;
 
 		// Next, determine approximately how long it would take to approach the target.
 		float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
@@ -130,9 +143,9 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 }
 
 // --------------------------------------------------
-void ofxFilterData::updateRateFromFrame(int nElapsedFrames) {
+void ofxFilterData::updateRateFromFrame(int nElapsedFrames, float easeParam) {
 
-	r.forward(m, nElapsedFrames);
+	r.forward(m, nElapsedFrames, easeParam);
 }
 
 // --------------------------------------------------

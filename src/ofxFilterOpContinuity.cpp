@@ -18,7 +18,9 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Thresh Mult", simParams.rateThreshMult, 0, 100);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Weight", simParams.rateWeight, 0, 10);
 	RUI_SHARE_PARAM_WCN(getID() + "- Friction", friction, 0, 1);
+	RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Power", frictionPower, 0, 10);
 	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
+	RUI_SHARE_PARAM_WCN(getID() + "- Epsilon Power", convParams.epsilonPower, 0, 12);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv FPS", convParams.frameRate, 0, 500);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Trans Speed", convParams.maxSpeed[0], 0, 20);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Rot Speed", convParams.maxSpeed[1], 0, 360);
@@ -26,7 +28,6 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Time", convParams.approachTime, 0, 20);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Buf", convParams.approachBuffer, 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.accStepPower, 1, 10);
-
 
 }
 
@@ -41,6 +42,10 @@ void ofxFilterOpContinuity::setup(ofxFilterOpSettings* _settings) {
 
 // --------------------------------------------------
 void ofxFilterOpContinuity::process(ofxFilterData& data) {
+
+	ofLogNotice("OC") << "\n\n================================ Frame " << ofGetFrameNum();
+	ofLogNotice("OC") << "Input data consists of:\n\t" << data.translation() << " " << data.bValid << "\t\t" << data.r[0][1] << "\t\t" << data.r[0][2];
+
 	if (data.r.size() != 3) {
 		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";
 		return;
@@ -54,6 +59,11 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 		// If this data is invalid and the max number of frames have elapsed, stop exporting data
 		if (!data.bValid && nFramesSinceObs >= s->nMaxPredFrames) {
 			bExporting = false;
+
+			// Reset all bools
+			bLinked = true;
+			bSetFirstPred = false;
+			ofLogNotice("OC") << "Stopped Exporting";
 		}
 	}
 	else {
@@ -61,8 +71,12 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 		// then begin exporting data
 		if (data.bValid && data.r.b[min(s->rateOrderToBeginExport, data.r.size())]) {
 			bExporting = true;
+			ofLogNotice("OC") << "Started Exporting";
 		}
 	}
+
+	if (bExporting) ofLogNotice("OC") << "We are currently exporting";
+	else ofLogNotice("OC") << "We are NOT exporrting.";
 
 	// If we're not exporting, mark output data as invalid
 	if (!bExporting) {
@@ -75,42 +89,65 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 	if (bLinked) {
 
 		if (data.bValid) {
-			if (!predData.bValid) {
+			if (!bSetFirstPred) {
 				// Set the predicted data for the very first time
-				predData.bValid = true;
+				bSetFirstPred = true;
 				predData = data;
+				ofLogNotice("OC") << "Set first prediction";
 			}
 			else {
 
 				// What would the current prediction be if we proceed without observations?
 				tmpData = predData;
+				tmpData.r.applyFriction(s->friction, s->frictionPower); // TODO: Should this be here?
 				tmpData.r.backward();
 				tmpData.setFrameFromRate();
+
+				ofLogNotice("OC") << "Calc linked prediction " << tmpData.translation();
 
 				// If many frames have elapsed and the observed data differs significantly from 
 				// predicted data, then this can no longer be linked. Proceed to unlinked
 				// instructions
 				if (nFramesSinceObs > s->nFramesUnlinkThresh && !tmpData.similar(data, s->simParams)) {
 					bLinked = false;
+					ofLogNotice("OC") << "Too dissimilar and over num frames for linkage. Stopping linkage";
 				}
 				else {
 					// Reconcile new (known) data with previous (perhaps uncertain) data.
 					predData.reconcile(data, s->existingLinkReconMode);
+
+					ofLogNotice("OC") << "Within linking window. Reconciling: " << predData.translation();
 				}
 			}
 		}
 		else {
-			// Backpropogate the rates to create a prediction
-			predData.r.backward();
-			// Set the frame from this prediction
-			predData.setFrameFromRate();
+
+			// Stop linking if we are over threshold
+			if (nFramesSinceObs > s->nFramesUnlinkThresh) {
+				bLinked = false;
+				ofLogNotice("OC") << "Stopping linkage. Over frame threshold.";
+			}
+			else {
+				// Apply friction
+				predData.r.applyFriction(s->friction, s->frictionPower);
+				// Backpropogate the rates to create a prediction
+				predData.r.backward();
+				// Set the frame from this prediction
+				predData.setFrameFromRate();
+
+				ofLogNotice("OC") << "Invalid data during linkage. Making prediction... " << predData.translation();
+			}
 		}
 	}
 
 	if (!bLinked) {
 
+		ofLogNotice("OC") << "We are NOT linked.";
+
 		if (data.bValid) {
 			// Valid data coming in that must be reconciled with
+
+			ofLogNotice("OC") << "Valid data... attempt to converge";
 			
 			// Look ahead a number of frames to find the likely observed point
 			// that we will attempt to converge onto
@@ -119,17 +156,37 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				tmpData.r.backward();
 				if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
 			}
+			ofLogNotice("OC") << "We are converging toward " << tmpData.translation();
 
 			// Converge the rates to this frame
-			tmpData = predData;
-			tmpData.converge(tmpData, s->convParams);
+			tmpData2 = predData;
+			tmpData2.converge(tmpData, s->convParams); // What if they are the same? Look at logs (TODO)
 
+			ofLogNotice("OC") << "After converging, rates go from: ";
+			for (int j = 0; j < tmpData2.r.size(); j++) {
+				ofLogNotice("OC") << "\t" << predData.r[0][j] << "\t--->---\t" << tmpData2.r[0][j] << "\t--->---\t" << tmpData.r[0][j];
+			}
+
+			ofLogNotice("OC") << "TmpData2: " << tmpData2.translation();
+			for (int j = 0; j < tmpData2.r.size(); j++) {
+				ofLogNotice("OC") << "\t" << tmpData2.r[0][j];
+			}
 			// Generate a prediction and set this frame
-			tmpData.r.backward();
-			tmpData.setFrameFromRate();
+			tmpData2.r.backward();
+			ofLogNotice("OC") << "TmpData2: " << tmpData2.translation();
+			for (int j = 0; j < tmpData2.r.size(); j++) {
+				ofLogNotice("OC") << "\t" << tmpData2.r[0][j];
+			}
+			tmpData2.setFrameFromRate();
+			ofLogNotice("OC") << "TmpData2: " << tmpData2.translation();
+			for (int j = 0; j < tmpData2.r.size(); j++) {
+				ofLogNotice("OC") << "\t" << tmpData2.r[0][j];
+			}
+
+			ofLogNotice("OC") << "Pred after convergence is " << tmpData2.translation();
 
 			// Compare with the observed data
-			if (tmpData.similar(data, s->simParams)) {
+			if (tmpData2.similar(data, s->simParams)) {
 				// Our predictions are similar to reality, so link up and reconcile new data
 				bLinked = true;
 
@@ -138,17 +195,23 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				// TODO: Do we reconcile with data or with tmpData? Or is tmpData doing
 				// the reconciling?
 				predData.reconcile(data, s->newLinkReconMode);
+
+				ofLogNotice("OC") << "Converged data is similar, so reconcile and relink: " << predData.translation();
 			}
 			else {
 				// We have been operating on our predictions all along
-				predData = tmpData;
+				predData = tmpData2;
+
+				ofLogNotice("OC") << "Converged data is not similar enough yet... continue on predicting";
 			}
 		}
 		else {
 			// No valid data, so we can only depend on predictions
-			predData.r.applyFriction(s->friction);
+			predData.r.applyFriction(s->friction, s->frictionPower);
 			predData.r.backward();
 			predData.setFrameFromRate();
+
+			ofLogNotice("OC") << "There is no valid data, so predict... " << predData.translation();
 		}
 	}
 

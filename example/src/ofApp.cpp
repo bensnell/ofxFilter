@@ -13,23 +13,6 @@ void ofApp::setup(){
 	filters.setup("mouse", "easing");
 	filters.getFilter("myMouse");
 
-
-	// Setup the RUI
-
-
-
-
-	//ofxFilterSettings settings;
-	//settings.kalmanSmoothness = 2;
-	//settings.kalmanRapidness = -1;
-	//settings.bKalmanUseAccel = true;    
-	//settings.bKalmanUseJerk = false;
-	//settings.predMode = ofxFilterPredMode::FILTER_PRED_ACC;
-	//settings.postMode = ofxFilterPostMode::FILTER_POST_EASING;
-
-	//filter.setParams(settings);
-	//filter.setup();
-
 }
 
 //--------------------------------------------------------------
@@ -41,6 +24,7 @@ void ofApp::update(){
 		if (bMousePressed) {
 			float rad = 5;
 			glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
+			position /= glm::vec2(ofGetHeight(), ofGetHeight());
 			filters.getFilter("myMouse")->process(position);
 		}
 		else {
@@ -48,13 +32,19 @@ void ofApp::update(){
 		}
 
 		// Make a prediction
+		bool bValid = filters.getFilter("myMouse")->isDataValid();
+		if ((bValid && !bLastValid) || lines.empty()) {
+			lines.push_back(ofPolyline());
+		}
+		bLastValid = bValid;
 		glm::vec2 pred = filters.getFilter("myMouse")->getPosition2D();
-		line.addVertex(pred.x, pred.y, 0);
+		pred *= glm::vec2(ofGetHeight(), ofGetHeight());
+		lines.back().addVertex(pred.x, pred.y, 0);
 	}
 
-	if (line.size() > 200) {
-		line.getVertices().erase(line.getVertices().begin(), line.getVertices().begin() + (line.getVertices().size() - 200));
-		line.flagHasChanged();
+	if (!lines.empty() && lines.back().size() > 200) {
+		lines.back().getVertices().erase(lines.back().getVertices().begin(), lines.back().getVertices().begin() + (lines.back().getVertices().size() - 200));
+		lines.back().flagHasChanged();
 	}
 }
 
@@ -71,7 +61,11 @@ void ofApp::draw(){
 	ofFill();
 	ofSetLineWidth(2);
 	ofSetColor(255, 0, 0);
-	line.draw();
+	for (int i = 0; i < lines.size(); i++) {
+		lines[i].draw();
+	}
+
+	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 10, 20);
 
 }
 

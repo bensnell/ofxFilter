@@ -30,6 +30,16 @@ public:
 	// n	reset rate after n empty frames
 	int nFramesToResetRate = 0;
 
+	// How much do we ease high order (2+) rates?
+	// Sometimes, there can be noise in high order rates that
+	// creates motion artifacts in predictions. To reduce, this,
+	// apply an each to the rates. 
+	// Range: [0, 1)
+	// 0	No ease applied. Resultant rates are observed rates
+	// 0.5	The resultant rate is half observed, half prior rate. (recommended)
+	// 0.95	The result rate is highly eased, changing very slowly.
+	float easeRatesAmt = 0.5;
+
 };
 
 class ofxFilterOpAddRate : public ofxFilterOp {

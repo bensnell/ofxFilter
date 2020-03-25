@@ -39,13 +39,19 @@ public:
 	}
 
 	
-	// Apply nFrames forward passes to update the rate
-	void forward(glm::mat4 m, int nFrames = 1);
+	// Apply nFrames forward passes to update the rate.
+	// By default, there is no easing.
+	void forward(glm::mat4 m, int nFrames = 1, float easeParam = 0.0);
 	// Backpropogate the rate to yield a prediction
 	void backward(int nFrames = 1);
 	
 	// Apply a frictional force
-	void applyFriction(float friction);
+	// Rate power describes how much friction increases for higher order rates.
+	// If rate power = 0, then no friction is applied
+	// velocity *= friction^(ratePower^0)
+	// acceleration *= friction^(ratePower^1)
+	// jerk *= friction^(ratePower^2)
+	void applyFriction(float friction, float ratePower);
 
 };
 
@@ -108,6 +114,7 @@ public:
 	// this closer to the provided frame.
 	class ConvergenceParams {
 	public:
+		float epsilonPower = 5;
 		float frameRate = 240.0;	// frames per second
 		// Maximum reasonable speed we would want a point to move (for t, r, s)
 		glm::vec3 maxSpeed = { 1.0, 90.0, 1.0 };
@@ -126,7 +133,7 @@ public:
 	mat4rate r;
 
 	// Update the rate (motion params), using internal frame data.
-	void updateRateFromFrame(int nElapsedFrames = 1);
+	void updateRateFromFrame(int nElapsedFrames = 1, float easeParam = 0);
 	// Set the internal matrix from the rate
 	bool setFrameFromRate();
 

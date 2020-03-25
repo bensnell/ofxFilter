@@ -7,7 +7,8 @@
 		<P name="FG_mouse_easing_0- Easing Param" type="float">0.942501</P>
 		<P name="FG_mouse_add-rate_1- Order" type="int">3</P>
 		<P name="FG_mouse_add-rate_1- Frames to Reset" type="int">0</P>
-		<P name="FG_mouse_continuity_2- Max Pred Frames" type="int">240</P>
+		<P name="FG_mouse_add-rate_1- Ease Rates Amt" type="float">0.5</P>
+		<P name="FG_mouse_continuity_2- Max Pred Frames" type="int">60</P>
 		<P name="FG_mouse_continuity_2- Rate Order for Export" type="int">1</P>
 		<P name="FG_mouse_continuity_2- Linked Recon Mode" type="enum">0</P>
 		<P name="FG_mouse_continuity_2- Frames to Unlink" type="int">10</P>
@@ -20,9 +21,11 @@
 		<P name="FG_mouse_continuity_2- Sim Num Rates" type="int">1</P>
 		<P name="FG_mouse_continuity_2- Sim Rate Thresh Mult" type="float">10</P>
 		<P name="FG_mouse_continuity_2- Sim Rate Weight" type="float">0</P>
-		<P name="FG_mouse_continuity_2- Friction" type="float">0.98</P>
+		<P name="FG_mouse_continuity_2- Friction" type="float">0.95</P>
+		<P name="FG_mouse_continuity_2- Friction Rate Power" type="float">2</P>
 		<P name="FG_mouse_continuity_2- Lookahead Frames" type="int">1</P>
-		<P name="FG_mouse_continuity_2- Conv FPS" type="float">240</P>
+		<P name="FG_mouse_continuity_2- Epsilon Power" type="float">5</P>
+		<P name="FG_mouse_continuity_2- Conv FPS" type="float">60</P>
 		<P name="FG_mouse_continuity_2- Conv Max Trans Speed" type="float">1</P>
 		<P name="FG_mouse_continuity_2- Conv Max Rot Speed" type="float">90</P>
 		<P name="FG_mouse_continuity_2- Conv Max Scale Speed" type="float">1</P>

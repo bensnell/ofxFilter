@@ -52,6 +52,7 @@ public:
 	// in higher order rates every frame.
 	// TODO: Should this be applied differentially to higher order rates?
 	float friction = 0.99;
+	float frictionPower = 2;
 
 	// In an unlinked state, how many frames do we look ahead to 
 	// reconcile our current heading with?
@@ -86,7 +87,8 @@ public:
 protected:
 
 	ofxFilterData predData;	// predicted data
-	ofxFilterData tmpData;	// temporary predicted data
+	ofxFilterData tmpData;	// temporary data #1
+	ofxFilterData tmpData2;	// temporary data #2
 	ofxFilterData outData;	// output data (final)
 
 
@@ -97,6 +99,9 @@ protected:
 	// If true, then there is no prediction underway. The output is the 
 	// observation.
 	bool bLinked = true;
+
+	// Have we set the very first prediction?
+	bool bSetFirstPred = false;
 
 	// Number of frames since the last observation
 	int nFramesSinceObs = 1;
