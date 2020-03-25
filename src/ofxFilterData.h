@@ -19,7 +19,7 @@ public:
 		case 2: return s;
 		default:
 			ofLogError("mat4rate") << "Cannot access with index " << i;
-			return vector<glm::vec3>();
+			return t; // NOT IDEAL -- what to do?
 		}	
 	}
 	bool isOrderValid(int i) {
@@ -66,7 +66,7 @@ public:
 
 	// Set the transformation matrix
 	void set(glm::mat4 _m) { m = _m; }
-	void set(glm::vec3& translation, glm::quat& rotation, glm::vec3 scale) {
+	void set(glm::vec3 translation, glm::quat rotation, glm::vec3 scale) {
 		m = glm::translate(translation)* glm::toMat4(rotation)* glm::scale(scale);
 	}
 

@@ -63,7 +63,8 @@ void ofxFilterOpKalman::process(ofxFilterData& data) {
 
 	// Set the new data
 	data.bValid = true;
-	data.set(kt.getPrediction(), quatConvert(kr.getPrediction()), ks.getPrediction());
+    ofQuaternion q = kr.getPrediction();
+	data.set(kt.getPrediction(), quatConvert(q), ks.getPrediction());
 }
 
 // --------------------------------------------------

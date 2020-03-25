@@ -91,18 +91,18 @@ glm::mat4 ofxFilter::process() {
 
 // --------------------------------------------------
 float ofxFilter::getScalar() {
-	return getTranslation(getFrame()).x;
+	return getTranslation(frame.m).x;
 }
 
 // --------------------------------------------------
 glm::vec2 ofxFilter::getPosition2D() {
-	auto p = getTranslation(getFrame());
+	auto p = getTranslation(frame.m);
 	return glm::vec2(p.x, p.y);
 }
 
 // --------------------------------------------------
 glm::vec3 ofxFilter::getPosition() {
-	return getTranslation(getFrame());
+	return getTranslation(frame.m);
 }
 
 // --------------------------------------------------

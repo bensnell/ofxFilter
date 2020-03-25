@@ -156,7 +156,7 @@ bool ofxFilterData::setFrameFromRate() {
 	ofQuaternion q;
 	q.set(0, 0, 0, 1);
 	q.makeRotate(r.r[0].x, glm::vec3(1, 0, 0), r.r[0].z, glm::vec3(0, 0, 1), r.r[0].y, glm::vec3(0, 1, 0));
-	
+    
 	set(r.t[0], quatConvert(q), r.s[0]);
 	
 	return true;
