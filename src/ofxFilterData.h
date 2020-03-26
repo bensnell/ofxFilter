@@ -40,8 +40,31 @@ public:
 
 	
 	// Apply nFrames forward passes to update the rate.
-	// By default, there is no easing.
-	void forward(glm::mat4 m, int nFrames = 1, float easeParam = 0.0);
+    class RateForwardParams {
+    public:
+        float frameRate = 240.0;    // frames per second
+        // How much do we ease new rates? [0, 1)
+        // 0    no easing
+        // 0.5  half old, half new rate
+        // 0.8  4/5 old, 1/5 new rate (good all-around param)
+        // 0.99 mostly old, very little new (changes very, very slowly)
+        // Easing params change depending on speed. The idea behind this is
+        // that higher speeds should allow rates to change faster, but
+        // lower speeds should change rates slower (this helps with
+        // high-frequency noise in the higher-order rates).
+        float fastEaseParam = 0.5;      // should be less
+        float slowEaseParam = 0.95;     // should be more
+        // The default param is used when speed is not available.
+        float defaultEaseParam = 0.8;
+        // The ratePower describes how much more easing
+        // is applied to rates, the higher their order. (0, +inf)
+        // 1 = no difference
+        // 0.5 = acc eases more than vel
+        // 2 = acc eases less than vel (not recommended)
+        float easeParamRatePower = 1.0;
+    };
+    void forward(glm::mat4 m, RateForwardParams& p, int nFrames = 1);
+    
 	// Backpropogate the rate to yield a prediction
 	void backward(int nFrames = 1);
 	
@@ -131,9 +154,10 @@ public:
 
 	// Rate Parameters
 	mat4rate r;
-
-	// Update the rate (motion params), using internal frame data.
-	void updateRateFromFrame(int nElapsedFrames = 1, float easeParam = 0);
+    
+    // Update the rates from the current frame m
+    void updateRateFromFrame(int nElapsedFrames, mat4rate::RateForwardParams& p);
+    
 	// Set the internal matrix from the rate
 	bool setFrameFromRate();
 

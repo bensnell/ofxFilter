@@ -1,7 +1,7 @@
 #include "ofxFilterData.h"
 
 // --------------------------------------------------
-void mat4rate::forward(glm::mat4 _m, int nElapsedFrames, float easeParam) {
+void mat4rate::forward(glm::mat4 _m, RateForwardParams& p, int nElapsedFrames) {
 
 	// Calculate the current euler angle (warping to correct dimension)
 	glm::vec3 euler = glm::eulerAngles(getRotation(_m));
@@ -9,6 +9,12 @@ void mat4rate::forward(glm::mat4 _m, int nElapsedFrames, float easeParam) {
 		euler = getEulerWarped(euler, r[0]);
 	}
 
+    // Calculate the ease params
+    glm::vec3 easeParams;
+    for (int i = 0; i < 3; i++) {
+        easeParams[i] = b[1] ? ofMap(glm::l2Norm((*this)[i][1]), 0.0, 1.0/p.frameRate, p.slowEaseParam, p.fastEaseParam, true) : p.defaultEaseParam;
+    }
+    
 	// Update rates
 	glm::vec3 _t = getTranslation(_m);
 	glm::vec3 _r = euler;
@@ -30,17 +36,23 @@ void mat4rate::forward(glm::mat4 _m, int nElapsedFrames, float easeParam) {
 			// Should rates be eased incrementally, so higher order rates change slower? (mix now)
 			// Or should rates change at the same time, so all rates change the same amount? 
 			//	(mix applied after ALL updates)
-
+            
 			tmp = t[i];
-			t[i] = glm::mix((t[i - 1] - _t) / div, t[i], easeParam);
+			t[i] = glm::mix((t[i - 1] - _t) / div,
+                            t[i],
+                            pow(easeParams[0], pow(p.easeParamRatePower, i-1)));
 			_t = tmp;
 
 			tmp = r[i];
-			r[i] = glm::mix((r[i - 1] - _r) / div, r[i], easeParam);
+			r[i] = glm::mix((r[i - 1] - _r) / div,
+                            r[i],
+                            pow(easeParams[1], pow(p.easeParamRatePower, i-1)));
 			_r = tmp;
 
 			tmp = s[i];
-			s[i] = glm::mix((s[i - 1] - _s) / div, s[i], easeParam);
+			s[i] = glm::mix((s[i - 1] - _s) / div,
+                            s[i],
+                            pow(easeParams[2], pow(p.easeParamRatePower, i-1)));
 			_s = tmp;
 		}
 
@@ -149,9 +161,9 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 }
 
 // --------------------------------------------------
-void ofxFilterData::updateRateFromFrame(int nElapsedFrames, float easeParam) {
-
-	r.forward(m, nElapsedFrames, easeParam);
+void ofxFilterData::updateRateFromFrame(int nElapsedFrames, mat4rate::RateForwardParams& p) {
+    
+	r.forward(m, p, nElapsedFrames);
 }
 
 // --------------------------------------------------
@@ -224,7 +236,8 @@ void ofxFilterData::reconcile(ofxFilterData& a, ReconciliationMode mode) {
 
 		bValid = a.bValid;
 		m = a.m;
-		updateRateFromFrame();
+        //        updateRateFromFrame(); // TODO: Uncomment
+        ofLogError("ofxFilterData") << "This reconciliation mode has not been properly setup yet. Use a different one";
 
 	}; break;
 	case ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL: default: {

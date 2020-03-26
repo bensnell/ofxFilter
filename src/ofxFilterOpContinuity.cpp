@@ -45,13 +45,15 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 
 	ofLogNotice("OC") << "\n\n================================ Frame " << ofGetFrameNum();
     if (data.bValid) {
-        string speed = data.r.isOrderValid(1) ? ofToString(glm::l2Norm(data.r[0][1])) : "--";
-        ofLogNotice("OC") << "\tObserved Pos:\t" << data.translation() << "\tspeed: " << speed; // << "\tv: " << data.r[0][1] << "\ta: " << data.r[0][2];
-        speed = predData.r.isOrderValid(1) ? ofToString(glm::l2Norm(predData.r[0][1])) : "--";
-        ofLogNotice("OC") << "\tLast Pos    :\t" << predData.translation() << "\tspeed: " << speed; // << "\tv: " << predData.r[0][1] << "\ta: " << predData.r[0][2];
+        ofLogNotice("OC") << "\tObserved Pos:\t" << data.translation();
+        if (data.r.isOrderValid(1)) ofLogNotice("OC") << "\tObserved Vel:\t" << data.r[0][1] << "\t\t||vel||= " << glm::l2Norm(data.r[0][1]);
+        if (data.r.isOrderValid(2)) ofLogNotice("OC") << "\tObserved Acc:\t" << data.r[0][2] << "\t\t||acc||= " << glm::l2Norm(data.r[0][2]);;
     } else {
         ofLogNotice("OC") << "No observed data";
     }
+    ofLogNotice("OC") << "\tLast Pos    :\t" << predData.translation();
+    if (predData.r.isOrderValid(1)) ofLogNotice("OC") << "\tLast Vel:\t" << predData.r[0][1] << "\t\t||vel||= " << glm::l2Norm(predData.r[0][1]);
+    if (predData.r.isOrderValid(2)) ofLogNotice("OC") << "\tLast Acc:\t" << predData.r[0][2] << "\t\t||acc||= " << glm::l2Norm(predData.r[0][2]);;
 
 	if (data.r.size() != 3) {
 		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";

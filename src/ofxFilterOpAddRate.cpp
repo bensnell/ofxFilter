@@ -7,8 +7,12 @@ void ofxFilterOpAddRateSettings::setupParams() {
 
 	RUI_SHARE_PARAM_WCN(getID() + "- Order", order, 1, 4);
 	RUI_SHARE_PARAM_WCN(getID() + "- Frames to Reset", nFramesToResetRate, 0, 120);
-	RUI_SHARE_PARAM_WCN(getID() + "- Ease Rates Amt", easeRatesAmt, 0, 1);
-
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF FPS", forwardParams.frameRate, 0, 1000);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Fast Ease", forwardParams.fastEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Slow Ease", forwardParams.slowEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Default Ease", forwardParams.defaultEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Ease Power", forwardParams.easeParamRatePower, 0, 10);
+    
 }
 
 // --------------------------------------------------
@@ -60,7 +64,7 @@ void ofxFilterOpAddRate::process(ofxFilterData& data) {
         // Set the new data
         lastValidData.set(data.m);
         // Update the rate
-        lastValidData.updateRateFromFrame(nFramesSinceValidData);
+        lastValidData.updateRateFromFrame(nFramesSinceValidData, s->forwardParams);
         // And output this data
         data = lastValidData;
         
