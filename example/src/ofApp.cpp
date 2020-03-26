@@ -12,7 +12,7 @@ void ofApp::setup(){
 	// Setup the filter group
 	filters.setup("mouse", "easing");
 	filters.getFilter("myMouse");
-
+    
 }
 
 //--------------------------------------------------------------
@@ -43,6 +43,7 @@ void ofApp::update(){
 	}
 
 	if (!lines.empty() && lines.back().size() > 200) {
+        ofLogNotice("ofApp") << lines.back().getVertices().front();
 		lines.back().getVertices().erase(lines.back().getVertices().begin(), lines.back().getVertices().begin() + (lines.back().getVertices().size() - 200));
 		lines.back().flagHasChanged();
 	}
@@ -71,6 +72,10 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    
+    if (key == ' ') {
+        ofLogNotice("ofApp") << "FLAG";
+    }
 
 }
 

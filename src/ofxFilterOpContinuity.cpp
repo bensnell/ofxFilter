@@ -17,8 +17,11 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Num Rates", simParams.nRates, 0, 4);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Thresh Mult", simParams.rateThreshMult, 0, 100);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Weight", simParams.rateWeight, 0, 10);
-	RUI_SHARE_PARAM_WCN(getID() + "- Friction", friction, 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Power", frictionPower, 0, 10);
+	RUI_SHARE_PARAM_WCN(getID() + "- Friction", frictionParams.friction, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Mult", frictionParams.rateMult, 0, 1);
+	RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Power", frictionParams.ratePower, 0, 10);
+    RUI_SHARE_PARAM_WCN(getID() + "- Friction Vel", frictionParams.frictionVel, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Friction Acc", frictionParams.frictionAcc, 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
 	RUI_SHARE_PARAM_WCN(getID() + "- Epsilon Power", convParams.epsilonPower, 0, 12);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv FPS", convParams.frameRate, 0, 500);
@@ -28,6 +31,9 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Time", convParams.approachTime, 0, 20);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Buf", convParams.approachBuffer, 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.accStepPower, 1, 10);
+    RUI_SHARE_PARAM_WCN(getID() + "- Red Opp Dir Mult", reduceParams.opposingDirMult, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Red Aln Dir Mult", reduceParams.alignedDirMult, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Red Power", reduceParams.power, 0, 1);
 
 }
 
@@ -96,8 +102,13 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 	// We are currently exporting data
 
 	if (bLinked) {
+        
+        ofLogNotice("OC") << "LINKED";
 
 		if (data.bValid) {
+            
+            ofLogNotice("OC") << "VALID DATA";
+            
 			if (!bSetFirstPred) {
 				// Set the predicted data for the very first time
 				bSetFirstPred = true;
@@ -108,7 +119,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 
 				// What would the current prediction be if we proceed without observations?
 				tmpData = predData;
-				tmpData.r.applyFriction(s->friction, s->frictionPower); // TODO: Should this be here?
+				tmpData.r.applyFriction(s->frictionParams); // TODO: Should this be here?
 				tmpData.r.backward();
 				tmpData.setFrameFromRate();
 
@@ -127,9 +138,13 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 
                     ofLogNotice("OC") << "Within linking window. Reconciling: " << predData.translation();
 				}
+                
+                bFlagAdjustAcc = true;
 			}
 		}
 		else {
+            
+            ofLogNotice("OC") << "INVALID DATA";
 
 			// Stop linking if we are over threshold
 			if (nFramesSinceObs > s->nFramesUnlinkThresh) {
@@ -137,8 +152,32 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
                 ofLogNotice("OC") << "Stopping linkage. Over frame threshold.";
 			}
 			else {
+                
+//                if (bFlagAdjustAcc) {
+//                    bFlagAdjustAcc = false;
+//                    if (predData.r.b[2]) {
+//                        for (int i = 0; i < 3; i++) {
+//                            float tmpMult = ofMap(glm::dot(glm::normalize(predData.r[i][1]), glm::normalize(predData.r[i][2])), -1, 1, 0, 1, true);
+//                            if (!isnan(tmpMult)) {
+//                                ofLogNotice("OC") << "Reduce acceleration by " << tmpMult;
+//                                ofLogNotice("OC") << "\tAcc before is: " << predData.r[i][2];
+//                                predData.r[i][2] *= tmpMult;
+//                                ofLogNotice("OC") << "\tAcc after is: " << predData.r[i][2];
+//                            } else {
+//                                ofLogNotice("OC") << "Cannot reduce acceleration because NAN";
+//                            }
+//                        }
+//                    }
+//                }
+                
+                // Reduce rates if applicable
+                if (bFlagAdjustAcc) {
+                    bFlagAdjustAcc = false;
+                    predData.r.reduceRates(s->reduceParams);
+                }
+                
 				// Apply friction
-				predData.r.applyFriction(s->friction, s->frictionPower);
+				predData.r.applyFriction(s->frictionParams);
 				// Backpropogate the rates to create a prediction
 				predData.r.backward();
 				// Set the frame from this prediction
@@ -150,19 +189,19 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 	}
 
 	if (!bLinked) {
-
-        ofLogNotice("OC") << "We are not linked.";
+        
+        ofLogNotice("OC") << "NOT LINKED";
         
 		if (data.bValid) {
 			// Valid data coming in that must be reconciled with
             
-            ofLogNotice("OC") << "There is valid data.";
+            ofLogNotice("OC") << "VALID DATA";
 			
 			// Look ahead a number of frames to find the likely observed point
 			// that we will attempt to converge onto
 			tmpData = data;
 			for (int i = 0; i < s->nLookaheadFrames; i++) {
-                tmpData.r.applyFriction(s->friction, s->frictionPower);
+                tmpData.r.applyFriction(s->frictionParams);
 				tmpData.r.backward();
 				if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
 			}
@@ -201,11 +240,22 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				predData = tmpData2;
 
 				ofLogNotice("OC") << "Converged data is not similar enough... continue predicting";
+                
+                bFlagAdjustAcc = true;
 			}
 		}
 		else {
+            
+            ofLogNotice("OC") << "INVALID DATA";
+            
+            // Reduce rates if applicable
+            if (bFlagAdjustAcc) {
+                bFlagAdjustAcc = false;
+                predData.r.reduceRates(s->reduceParams);
+            }
+            
 			// No valid data, so we can only depend on predictions
-			predData.r.applyFriction(s->friction, s->frictionPower);
+			predData.r.applyFriction(s->frictionParams);
 			predData.r.backward();
 			predData.setFrameFromRate();
 

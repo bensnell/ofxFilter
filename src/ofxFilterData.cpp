@@ -64,7 +64,7 @@ void mat4rate::forward(glm::mat4 _m, RateForwardParams& p, int nElapsedFrames) {
 }
 
 // --------------------------------------------------
-void mat4rate::applyFriction(float friction, float ratePower) {
+void mat4rate::applyFriction(RateFrictionParams& p) {
 
 	// Don't apply friction to lowest-order parameters (skip 0)
 	for (int i = 1; i < size(); i++) {
@@ -73,7 +73,12 @@ void mat4rate::applyFriction(float friction, float ratePower) {
 		if (!b[i]) break;
 		
 		for (int j = 0; j < 3; j++) {
-			(*this)[j][i] *= pow(friction, pow(ratePower, i - 1));
+            //            (*this)[j][i] *= pow(p.friction, pow(p.ratePower, i - 1));
+            
+            (*this)[j][i] *= p.friction * pow(p.rateMult, p.ratePower * (i-1));
+            
+//            (*this)[j][i] *= (i == 1) ? p.frictionVel : p.frictionAcc;
+
 		}
 	}
 }
@@ -96,6 +101,36 @@ void mat4rate::backward(int nFrames) {
 	}
 
 	// TODO: Should rotations be normalized after back propogation?
+}
+
+// --------------------------------------------------
+void mat4rate::reduceRates(RateReduceParams& p) {
+    
+    // Iterate through all 2+ order rates.
+    // It doesn't matter the order in which we iterate, since
+    // we are only comparing direction, and this function only changes
+    // mangitude.
+    for (int order = 2; order < size(); order++) {
+        
+        // If this rate is invalid, break because all rates to follow will also
+        // be invalid.
+        if (!b[order]) break;
+        
+        // Assume that if this is valid, lower order rates will also be valid.
+        // For example, if acc is valid, vel should also be valid.
+        
+        // Iterate through t, r ,s
+        for (int i = 0; i < 3; i++) {
+            // How much will we reduce this rate?
+            float mult = ofMap(glm::dot(glm::normalize((*this)[i][order-1]), glm::normalize((*this)[i][order])), -1, 1, 0, 1, true);
+            if (isnan(mult)) continue;  // skip if invalid
+            mult = pow(mult, p.power);
+            mult = ofMap(mult, 0, 1, p.opposingDirMult, p.alignedDirMult, true);
+            
+            // Apply the rate
+            (*this)[i][order] *= mult;
+        }
+    }
 }
 
 // --------------------------------------------------

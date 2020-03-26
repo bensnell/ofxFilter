@@ -68,13 +68,47 @@ public:
 	// Backpropogate the rate to yield a prediction
 	void backward(int nFrames = 1);
 	
-	// Apply a frictional force
-	// Rate power describes how much friction increases for higher order rates.
-	// If rate power = 0, then no friction is applied
-	// velocity *= friction^(ratePower^0)
-	// acceleration *= friction^(ratePower^1)
-	// jerk *= friction^(ratePower^2)
-	void applyFriction(float friction, float ratePower);
+	// Apply a frictional force.
+    // Friction describes the fraction of energy that is retained
+    // in higher order rates every frame.
+    class RateFrictionParams {
+    public:
+        // The minimum amount of friction. This amount is applied to the
+        // velocity. Amounts applied to higher order rates (acc, jerk,
+        // etc.) will be less or equal to this number, depending
+        // on the rateMult and ratePower.
+        float friction = 0.95;
+        // The rateMult and ratePower decribes how much more friction
+        // is applied to higher order rates.
+        // velocity *=      friction * rateMult^(ratePower*0)
+        // acceleration *=  friction * rateMult^(ratePower*1)
+        // jerk *=          friction * rateMult^(ratePower*2)
+        float rateMult = 0.95;   // range (0, 1]; 1 = no change to higher rates
+        float ratePower = 2.0;  // range [0, +inf); 0 = constant change, 1 = linear change
+        
+        
+        
+        float frictionVel = 0.95;
+        float frictionAcc = 0.8;
+        // TODO: interpolation type (to higher orders)
+        
+    };
+	void applyFriction(RateFrictionParams& p);
+    
+    // Reduce higher order rates (acc+) the more they oppose the next
+    // lower rate. This can be useful when switching from converging
+    // to predicting only, since converging can introduce rates
+    // of higher-than normal magnitude, which, when stopped immediately,
+    // result in strange behaviors. This function is essentially a check
+    // on convergence.
+    class RateReduceParams {
+    public:
+        float opposingDirMult = 0; // reduction for opposing directions
+        float alignedDirMult = 1;  // reduction for aligned directions
+        float power = 1.0;         // sensitizes the multiplier for the right orthogonal multiplier
+    };
+    void reduceRates(RateReduceParams& p);
+    
 
 };
 

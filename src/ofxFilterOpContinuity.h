@@ -47,18 +47,12 @@ public:
 	// between two different data frames.
 	ofxFilterData::SimilarityParams simParams;
 
-	// In an unlinked state, how much friction will be applied?
-	// Friction describes the fraction of energy that is retained
-	// in higher order rates every frame.
-	// TODO: Should this be applied differentially to higher order rates?
-	float friction = 0.99;
-	float frictionPower = 2;
-
 	// In an unlinked state, how many frames do we look ahead to 
 	// reconcile our current heading with?
-	// 0	don't look ahead
-	// n	look ahead n frames
-	int nLookaheadFrames = 1;
+	// 0	don't look ahead (safest)
+	// n	look ahead n frames (too high and there may be artifacts)
+    // TODO: lookahead changes (high when far away; low when close) (?)
+	int nLookaheadFrames = 0;
 
 	// How do we reconcile a new link?
 	// TODO: Do we carryover convergence rates for a new link? Or use the
@@ -69,6 +63,12 @@ public:
 
 	// Convergence params
 	ofxFilterData::ConvergenceParams convParams;
+    
+    // Friction params
+    mat4rate::RateFrictionParams frictionParams;
+    
+    // Rate Reduction Params
+    mat4rate::RateReduceParams reduceParams;
 
 };
 
@@ -106,7 +106,7 @@ protected:
 	// Number of frames since the last observation
 	int nFramesSinceObs = 1;
 
-
+    bool bFlagAdjustAcc = false;
 
 
 };
