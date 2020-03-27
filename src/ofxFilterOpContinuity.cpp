@@ -26,7 +26,7 @@ void ofxFilterOpContinuitySettings::setupParams() {
     RUI_SHARE_PARAM_WCN(getID() + "- Friction Acc", frictionParams.frictionAcc, 0, 1);
     
 	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
-	RUI_SHARE_PARAM_WCN(getID() + "- Epsilon Power", convParams.epsilonPower, 0, 12);
+	RUI_SHARE_PARAM_WCN(getID() + "- Conv Epsilon Power", convParams.epsilonPower, 0, 12);
     
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv FPS", convParams.frameRate, 0, 500);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Trans Speed", convParams.maxSpeed[0], 0, 20);

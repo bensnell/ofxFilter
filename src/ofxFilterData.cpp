@@ -161,7 +161,9 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 
         // Next, determine approximately how long it would take to approach the target.
         float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
+        if (isnan(k0)) k0 = 1.0;
         float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
+        if (isnan(k1)) k1 = 1.0;
         float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
         ofLogNotice("FD") << "\t\tTime to Target\t" << timeToTarget;
 

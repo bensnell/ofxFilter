@@ -3,9 +3,14 @@
 	<OFX_REMOTE_UI_PARAMS>
 		<!-- # ofxFilterGroup - mouse ################################################################################# -->
 		<P name="ofxFilterGroup - mouse" type="group" />
-		<P name="FG_mouse- opList" type="string">easing,add-rate,continuity</P>
-		<P name="FG_mouse_easing_0- Easing Param" type="float">0.9</P>
-		<P name="FG_mouse_easing_0- Frames To Reset" type="int">1</P>
+		<P name="FG_mouse- opList" type="string">kalman,add-rate,continuity</P>
+		<P name="FG_mouse_kalman_0- Smoothness" type="float">5</P>
+		<P name="FG_mouse_kalman_0- Rapidness" type="float">1</P>
+		<P name="FG_mouse_kalman_0- Use Accel" type="bool">1</P>
+		<P name="FG_mouse_kalman_0- Use Jerk" type="bool">0</P>
+		<P name="FG_mouse_kalman_0- Predict Empty" type="bool">0</P>
+		<P name="FG_mouse_kalman_0- Max Empty Pred" type="int">10</P>
+		<P name="FG_mouse_kalman_0- Reset After Empty" type="bool">1</P>
 		<P name="FG_mouse_add-rate_1- Order" type="int">3</P>
 		<P name="FG_mouse_add-rate_1- Frames to Reset" type="int">3</P>
 		<P name="FG_mouse_add-rate_1- RateF FPS" type="float">60</P>
@@ -32,7 +37,7 @@
 		<P name="FG_mouse_continuity_2- Friction Vel" type="float">0.95</P>
 		<P name="FG_mouse_continuity_2- Friction Acc" type="float">0.95</P>
 		<P name="FG_mouse_continuity_2- Lookahead Frames" type="int">0</P>
-		<P name="FG_mouse_continuity_2- Epsilon Power" type="float">5</P>
+		<P name="FG_mouse_continuity_2- Conv Epsilon Power" type="float">5</P>
 		<P name="FG_mouse_continuity_2- Conv FPS" type="float">60</P>
 		<P name="FG_mouse_continuity_2- Conv Max Trans Speed" type="float">1</P>
 		<P name="FG_mouse_continuity_2- Conv Max Rot Speed" type="float">90</P>
@@ -46,13 +51,8 @@
 		<!--                                                                                                  -->
 		<!-- ###################################### DISABLED PARAMS ######################################### -->
 		<!--                                                                                                  -->
-		<P name="FG_mouse_kalman_0- Smoothness" type="float" disabled="1">3</P>
-		<P name="FG_mouse_kalman_0- Rapidness" type="float" disabled="1">1</P>
-		<P name="FG_mouse_kalman_0- Use Accel" type="bool" disabled="1">1</P>
-		<P name="FG_mouse_kalman_0- Use Jerk" type="bool" disabled="1">0</P>
-		<P name="FG_mouse_kalman_0- Predict Empty" type="bool" disabled="1">1</P>
-		<P name="FG_mouse_kalman_0- Max Empty Pred" type="int" disabled="1">10</P>
-		<P name="FG_mouse_kalman_0- Reset After Empty" type="bool" disabled="1">1</P>
+		<P name="FG_mouse_easing_0- Easing Param" type="float" disabled="1">0.9</P>
+		<P name="FG_mouse_easing_0- Frames To Reset" type="int" disabled="1">1</P>
 		<P name="FG_mouse_add-rate_1- Ease Rates Amt" type="float" disabled="1">0.8</P>
 		<P name="FG_mouse_add-rate_1- Reset After Empty" type="bool" disabled="1">0</P>
 		<P name="FG_mouse_easing_1- Easing Param" type="float" disabled="1">0.8</P>
