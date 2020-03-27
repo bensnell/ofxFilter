@@ -18,6 +18,8 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
+    bool bOneDim = false;
+    
 	if (bFilterActive) {
 
 		// Add a measurement
@@ -25,6 +27,7 @@ void ofApp::update(){
 			float rad = 5;
 			glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
 			position /= glm::vec2(ofGetHeight(), ofGetHeight());
+            if (bOneDim) position.y = 0.0;
 			filters.getFilter("myMouse")->process(position);
 		}
 		else {
@@ -37,13 +40,15 @@ void ofApp::update(){
 			lines.push_back(ofPolyline());
 		}
 		bLastValid = bValid;
-		glm::vec2 pred = filters.getFilter("myMouse")->getPosition2D();
-		pred *= glm::vec2(ofGetHeight(), ofGetHeight());
-		lines.back().addVertex(pred.x, pred.y, 0);
+        if (bValid) {
+            glm::vec2 pred = filters.getFilter("myMouse")->getPosition2D();
+            if (bOneDim) pred.y += fmod(float(ofGetElapsedTimef()),10.0)/10.0;
+            pred *= glm::vec2(ofGetHeight(), ofGetHeight());
+            lines.back().addVertex(pred.x, pred.y, 0);
+        }
 	}
 
 	if (!lines.empty() && lines.back().size() > 200) {
-        ofLogNotice("ofApp") << lines.back().getVertices().front();
 		lines.back().getVertices().erase(lines.back().getVertices().begin(), lines.back().getVertices().begin() + (lines.back().getVertices().size() - 200));
 		lines.back().flagHasChanged();
 	}
@@ -72,10 +77,6 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    
-    if (key == ' ') {
-        ofLogNotice("ofApp") << "FLAG";
-    }
 
 }
 

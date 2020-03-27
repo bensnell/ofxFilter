@@ -8,6 +8,7 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	vector<string> reconModes = ofxFilterData::getReconciliationModes();
 	RUI_SHARE_ENUM_PARAM_WCN(getID() + "- Linked Recon Mode", existingLinkReconMode, ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL, ofxFilterData::ReconciliationMode::NUM_OFXFILTERDATA_RECONCILE_MODES-1, reconModes);
 	RUI_SHARE_PARAM_WCN(getID() + "- Frames to Unlink", nFramesUnlinkThresh, 0, 120);
+    
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Trans Thresh", simParams.thresh[0], 0, 10);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Trans Mix", simParams.mix[0], 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rot Thresh", simParams.thresh[1], 0, 45);
@@ -17,13 +18,16 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Num Rates", simParams.nRates, 0, 4);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Thresh Mult", simParams.rateThreshMult, 0, 100);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Weight", simParams.rateWeight, 0, 10);
+    
 	RUI_SHARE_PARAM_WCN(getID() + "- Friction", frictionParams.friction, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Mult", frictionParams.rateMult, 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Power", frictionParams.ratePower, 0, 10);
     RUI_SHARE_PARAM_WCN(getID() + "- Friction Vel", frictionParams.frictionVel, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- Friction Acc", frictionParams.frictionAcc, 0, 1);
+    
 	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
 	RUI_SHARE_PARAM_WCN(getID() + "- Epsilon Power", convParams.epsilonPower, 0, 12);
+    
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv FPS", convParams.frameRate, 0, 500);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Trans Speed", convParams.maxSpeed[0], 0, 20);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Rot Speed", convParams.maxSpeed[1], 0, 360);
@@ -31,6 +35,8 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Time", convParams.approachTime, 0, 20);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Buf", convParams.approachBuffer, 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.accStepPower, 1, 10);
+    RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.targetSpeedEaseParam, 0, 1);
+    
     RUI_SHARE_PARAM_WCN(getID() + "- Red Opp Dir Mult", reduceParams.opposingDirMult, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- Red Aln Dir Mult", reduceParams.alignedDirMult, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- Red Power", reduceParams.power, 0, 1);
@@ -58,8 +64,8 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
         ofLogNotice("OC") << "No observed data";
     }
     ofLogNotice("OC") << "\tLast Pos    :\t" << predData.translation();
-    if (predData.r.isOrderValid(1)) ofLogNotice("OC") << "\tLast Vel:\t" << predData.r[0][1] << "\t\t||vel||= " << glm::l2Norm(predData.r[0][1]);
-    if (predData.r.isOrderValid(2)) ofLogNotice("OC") << "\tLast Acc:\t" << predData.r[0][2] << "\t\t||acc||= " << glm::l2Norm(predData.r[0][2]);;
+    if (predData.r.isOrderValid(1)) ofLogNotice("OC") << "\tLast Vel:\t\t" << predData.r[0][1] << "\t\t||vel||= " << glm::l2Norm(predData.r[0][1]);
+    if (predData.r.isOrderValid(2)) ofLogNotice("OC") << "\tLast Acc:\t\t" << predData.r[0][2] << "\t\t||acc||= " << glm::l2Norm(predData.r[0][2]);;
 
 	if (data.r.size() != 3) {
 		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";
@@ -78,7 +84,6 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			// Reset all bools
 			bLinked = true;
 			bSetFirstPred = false;
-			ofLogNotice("OC") << "Stopped Exporting";
 		}
 	}
 	else {
@@ -86,12 +91,8 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 		// then begin exporting data
 		if (data.bValid && data.r.b[min(s->rateOrderToBeginExport, data.r.size())]) {
 			bExporting = true;
-			ofLogNotice("OC") << "Started Exporting";
 		}
 	}
-
-    if (bExporting) ofLogNotice("OC") << "We are currently exporting";
-    else ofLogNotice("OC") << "We are NOT exporrting.";
 
 	// If we're not exporting, mark output data as invalid
 	if (!bExporting) {
@@ -113,7 +114,6 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				// Set the predicted data for the very first time
 				bSetFirstPred = true;
 				predData = data;
-                ofLogNotice("OC") << "Set first prediction";
 			}
 			else {
 
@@ -123,20 +123,16 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				tmpData.r.backward();
 				tmpData.setFrameFromRate();
 
-                ofLogNotice("OC") << "Calc linked prediction " << tmpData.translation();
-
 				// If many frames have elapsed and the observed data differs significantly from 
 				// predicted data, then this can no longer be linked. Proceed to unlinked
 				// instructions
 				if (nFramesSinceObs > s->nFramesUnlinkThresh && !tmpData.similar(data, s->simParams)) {
 					bLinked = false;
-                    ofLogNotice("OC") << "Too dissimilar and over num frames for linkage. Stopping linkage";
+                    ofLogNotice("OC") << "Stop Link...";
 				}
 				else {
 					// Reconcile new (known) data with previous (perhaps uncertain) data.
 					predData.reconcile(data, s->existingLinkReconMode);
-
-                    ofLogNotice("OC") << "Within linking window. Reconciling: " << predData.translation();
 				}
                 
                 bFlagAdjustAcc = true;
@@ -149,27 +145,10 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			// Stop linking if we are over threshold
 			if (nFramesSinceObs > s->nFramesUnlinkThresh) {
 				bLinked = false;
-                ofLogNotice("OC") << "Stopping linkage. Over frame threshold.";
+                ofLogNotice("OC") << "Stop Link...";
 			}
 			else {
-                
-//                if (bFlagAdjustAcc) {
-//                    bFlagAdjustAcc = false;
-//                    if (predData.r.b[2]) {
-//                        for (int i = 0; i < 3; i++) {
-//                            float tmpMult = ofMap(glm::dot(glm::normalize(predData.r[i][1]), glm::normalize(predData.r[i][2])), -1, 1, 0, 1, true);
-//                            if (!isnan(tmpMult)) {
-//                                ofLogNotice("OC") << "Reduce acceleration by " << tmpMult;
-//                                ofLogNotice("OC") << "\tAcc before is: " << predData.r[i][2];
-//                                predData.r[i][2] *= tmpMult;
-//                                ofLogNotice("OC") << "\tAcc after is: " << predData.r[i][2];
-//                            } else {
-//                                ofLogNotice("OC") << "Cannot reduce acceleration because NAN";
-//                            }
-//                        }
-//                    }
-//                }
-                
+               
                 // Reduce rates if applicable
                 if (bFlagAdjustAcc) {
                     bFlagAdjustAcc = false;
@@ -182,8 +161,6 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				predData.r.backward();
 				// Set the frame from this prediction
 				predData.setFrameFromRate();
-
-                ofLogNotice("OC") << "Invalid data during linkage. Making prediction... " << predData.translation() << "\t" << predData.r[0][1] << "\t" << predData.r[0][2];
 			}
 		}
 	}
@@ -205,7 +182,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				tmpData.r.backward();
 				if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
 			}
-            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation() << " with speed " << glm::l2Norm(tmpData.r[0][1]);
+            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation().x;
 
 			// Converge the rates to this frame
 			tmpData2 = predData;
@@ -233,13 +210,11 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				// the reconciling?
 				predData.reconcile(data, s->newLinkReconMode);
 
-				ofLogNotice("OC") << "Converged data is similar, so reconcile and relink: " << predData.translation();
+                ofLogNotice("OC") << "ReLink...";
 			}
 			else {
 				// We have been operating on our predictions all along
 				predData = tmpData2;
-
-				ofLogNotice("OC") << "Converged data is not similar enough... continue predicting";
                 
                 bFlagAdjustAcc = true;
 			}
@@ -258,8 +233,6 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			predData.r.applyFriction(s->frictionParams);
 			predData.r.backward();
 			predData.setFrameFromRate();
-
-            ofLogNotice("OC") << "Prediction: " << predData.translation() << "\t" << predData.r[0][1] << "\t" << predData.r[0][2];
 		}
 	}
 

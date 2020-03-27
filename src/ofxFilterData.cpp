@@ -136,64 +136,149 @@ void mat4rate::reduceRates(RateReduceParams& p) {
 // --------------------------------------------------
 bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 
-	// TODO: Check to make sure rates are valid (and there are enough of them)
-	if (r.size() < 3 || to.r.size() < 3 || !r.isOrderValid(2) || !to.r.isOrderValid(1)) return false;
+    // TODO: Check to make sure rates are valid (and there are enough of them)
+    if (r.size() < 3 || to.r.size() < 3 || !r.isOrderValid(2) || !to.r.isOrderValid(1)) return false;
 
-	for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
 
-		// If FROM and TO frames are the same, then skip
-		if (m == to.m) continue;
+        // If FROM and TO frames are the same, then skip
+        if (m == to.m) continue;
 
-		// First, find the vector to the target
-		glm::vec3 heading;
-		if (i == 1) { // rotation
-			heading = getEulerWarped(to.r[i][0], r[i][0]) - r[i][0];
-		}
-		else {
-			heading = to.r[i][0] - r[i][0];
-		}
+        // First, find the vector to the target
+        glm::vec3 heading;
+        if (i == 1) { // rotation
+            heading = getEulerWarped(to.r[i][0], r[i][0]) - r[i][0];
+        }
+        else {
+            heading = to.r[i][0] - r[i][0];
+        }
 
-		// If the heading is too small, then skip
-		float epsilon = glm::l2Norm(heading);
-		if (epsilon < pow(10, -p.epsilonPower)) continue;
-        
+        // If the heading is too small, then skip
+        float epsilon = glm::l2Norm(heading);
+        if (epsilon < pow(10, -p.epsilonPower)) continue;
+
         ofLogNotice("FD") << "\t\tHeading\t\t\t" << heading;
 
-		// Next, determine approximately how long it would take to approach the target.
-		float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
-		float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
-		float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
+        // Next, determine approximately how long it would take to approach the target.
+        float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
+        float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
+        float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
         ofLogNotice("FD") << "\t\tTime to Target\t" << timeToTarget;
 
-		// Determine the target speed
-		float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
-		float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
-		float targetSpeed = ofLerp(glm::l2Norm(to.r[i][1]), maxSpeedPerFrame, paramToMaxSpeed);
+        // Determine the target speed
+        float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
+        float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
+
+        float prevSpeed = glm::l2Norm(to.r[i][1]);
+        float idealSpeed = ofLerp(prevSpeed, maxSpeedPerFrame, paramToMaxSpeed);
+        float targetSpeed = ofLerp(prevSpeed, idealSpeed, 1.0 - p.targetSpeedEaseParam); // Easing param to change
+
+        //        float targetSpeed = ofLerp(glm::l2Norm(to.r[i][1]), maxSpeedPerFrame, paramToMaxSpeed);
+
         ofLogNotice("FD") << "\t\tTarget Speed\t" << targetSpeed << "\tto: " << glm::l2Norm(to.r[i][1]) << "\t maxPerFrame: " << maxSpeedPerFrame << "\tparam: " << paramToMaxSpeed;
-        
-		// Determine the target velocity
-		glm::vec3 targetVel = glm::normalize(heading)* targetSpeed;
+
+        // Determine the target velocity
+        glm::vec3 targetVel = glm::normalize(heading)* targetSpeed;
         ofLogNotice("FD") << "\t\tTarget Vel\t\t" << targetVel;
 
-		// Determine the target acceleration
-		glm::vec3 targetAcc = targetVel - r[i][1];
+        // Determine the target acceleration
+        // Find the ideal acceleration
+        glm::vec3 idealAcc = targetVel - r[i][1];
+        // Lerp the acceleration magnitude, so we have rounded corners during convergence
+        float accMagnitude = ofLerp(glm::l2Norm(idealAcc), glm::l2Norm(r[i][2]), p.accMagEaseParam);
+        // Calculatet the target acceleration
+        glm::vec3 targetAcc = (glm::l2Norm(idealAcc) == 0.0) ? glm::vec3(0,0,0) : (glm::normalize(idealAcc) * accMagnitude);
+        
         ofLogNotice("FD") << "\t\tTarget Acc\t\t" << targetAcc;
 
-		// Calculate the required jerk
-		glm::vec3 targetJerk = targetAcc - r[i][2];
-		float maxAccStepPerFrame = p.maxSpeed[i] / pow(p.frameRate, p.accStepPower);
-		float jerkMagnitude = min(glm::l2Norm(targetJerk), maxAccStepPerFrame);
-		glm::vec3 jerk = glm::normalize(targetJerk) * jerkMagnitude;
+        // Calculate the required jerk
+        glm::vec3 targetJerk = targetAcc - r[i][2];
+        float maxAccStepPerFrame = p.maxSpeed[i] / pow(p.frameRate, p.accStepPower);
+        float jerkMagnitude = min(glm::l2Norm(targetJerk), maxAccStepPerFrame);
+        // check for a zero jerk to prevent NAN
+        glm::vec3 jerk = (glm::l2Norm(targetJerk) == 0.0) ? glm::vec3(0,0,0) : (glm::normalize(targetJerk) * jerkMagnitude);
 
-		// Calculate the new (adjusted) accleration that would be required to
-		// produce the motion we desire (convergence on the target frame) and set it.
-		r[i][2] = r[i][2] + jerk;
-	}
+        ofLogNotice("FD") << "\t\tJerk is\t\t" << jerk;
 
-	// TODO: Should they converge evenly?
+        // Calculate the new (adjusted) accleration that would be required to
+        // produce the motion we desire (convergence on the target frame) and set it.
+        r[i][2] = r[i][2] + jerk;
+    }
 
-	return true;
+    // TODO: Should they converge evenly?
+
+    return true;
 }
+
+//bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
+//
+//    // TODO: Check to make sure rates are valid (and there are enough of them)
+//    if (r.size() < 3 || to.r.size() < 3 || !r.isOrderValid(2) || !to.r.isOrderValid(1)) return false;
+//
+//    for (int i = 0; i < 3; i++) {
+//
+//        // If FROM and TO frames are the same, then skip
+//        if (m == to.m) continue;
+//
+//        // First, find the vector to the target
+//        glm::vec3 heading;
+//        if (i == 1) { // rotation
+//            heading = getEulerWarped(to.r[i][0], r[i][0]) - r[i][0];
+//        }
+//        else {
+//            heading = to.r[i][0] - r[i][0];
+//        }
+//
+//        // If the heading is too small, then skip
+//        float epsilon = glm::l2Norm(heading);
+//        if (epsilon < pow(10, -p.epsilonPower)) continue;
+//
+//        ofLogNotice("FD") << "\t\tHeading\t\t\t" << heading;
+//
+//        // Next, determine approximately how long it would take to approach the target.
+//        float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
+//        float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
+//        float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
+//        ofLogNotice("FD") << "\t\tTime to Target\t" << timeToTarget;
+//
+//        // Determine the target speed
+//        float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
+//        float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
+//
+//        float prevSpeed = glm::l2Norm(to.r[i][1]);
+//        float idealSpeed = ofLerp(prevSpeed, maxSpeedPerFrame, paramToMaxSpeed);
+//        float targetSpeed = ofLerp(prevSpeed, idealSpeed, 1.0 - p.targetSpeedEaseParam); // Easing param to change
+//
+//        //        float targetSpeed = ofLerp(glm::l2Norm(to.r[i][1]), maxSpeedPerFrame, paramToMaxSpeed);
+//
+//        ofLogNotice("FD") << "\t\tTarget Speed\t" << targetSpeed << "\tto: " << glm::l2Norm(to.r[i][1]) << "\t maxPerFrame: " << maxSpeedPerFrame << "\tparam: " << paramToMaxSpeed;
+//
+//        // Determine the target velocity
+//        glm::vec3 targetVel = glm::normalize(heading)* targetSpeed;
+//        ofLogNotice("FD") << "\t\tTarget Vel\t\t" << targetVel;
+//
+//        // Determine the target acceleration
+//        glm::vec3 targetAcc = targetVel - r[i][1];
+//        ofLogNotice("FD") << "\t\tTarget Acc\t\t" << targetAcc;
+//
+//        // Calculate the required jerk
+//        glm::vec3 targetJerk = targetAcc - r[i][2];
+//        float maxAccStepPerFrame = p.maxSpeed[i] / pow(p.frameRate, p.accStepPower);
+//        float jerkMagnitude = min(glm::l2Norm(targetJerk), maxAccStepPerFrame);
+//        // check for a zero jerk to prevent NAN
+//        glm::vec3 jerk = (glm::l2Norm(targetJerk) == 0.0) ? glm::vec3(0,0,0) : (glm::normalize(targetJerk) * jerkMagnitude);
+//
+//        ofLogNotice("FD") << "\t\tJerk is\t\t" << jerk;
+//
+//        // Calculate the new (adjusted) accleration that would be required to
+//        // produce the motion we desire (convergence on the target frame) and set it.
+//        r[i][2] = r[i][2] + jerk;
+//    }
+//
+//    // TODO: Should they converge evenly?
+//
+//    return true;
+//}
 
 // --------------------------------------------------
 void ofxFilterData::updateRateFromFrame(int nElapsedFrames, mat4rate::RateForwardParams& p) {

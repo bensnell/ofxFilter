@@ -6,6 +6,7 @@ void ofxFilterOpEasingSettings::setupParams() {
 	// Don't create a new group, just add on params
 
 	RUI_SHARE_PARAM_WCN(getID() + "- Easing Param", easingParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Frames To Reset", nEmptyFramesToReset, 0, 240);
 
 }
 
@@ -18,27 +19,32 @@ void ofxFilterOpEasing::setup(ofxFilterOpSettings* _settings) {
 
 // --------------------------------------------------
 void ofxFilterOpEasing::process(ofxFilterData& data) {
-	if (!data.bValid) return;
 
-	// Skip the first process
-	if (bFirstEase) {
-		bFirstEase = false;
-		lastValidData = data;
-		return;
-	}
+    // Increment the number of frames
+    nFramesSinceObs++;
 
-	float easingParam = static_cast<ofxFilterOpEasingSettings*>(settings)->easingParam;
+    // If we don't have valid data, return
+    if (!data.bValid) return;
+    
+    // Get the settings for this operator
+    ofxFilterOpEasingSettings* s = static_cast<ofxFilterOpEasingSettings*>(settings);
 
-	// Process the data
-	// Apply an ease by lerping data
-	data.lerp(lastValidData, easingParam);
+    if (bFirstEase || nFramesSinceObs > s->nEmptyFramesToReset) {
+        // Skip the first process or reset the ease
+        bFirstEase = false;
 
-	// Save the last data
-	lastValidData = data;
+    } else {
+        // Process the data
+        // Apply an ease by lerping data
+        data.lerp(lastValidData, s->easingParam);
+    }
+
+    // Save the last data
+    lastValidData = data;
+
+    // This is valid data, so reset the elapsed frames
+    nFramesSinceObs = 0;
 }
-
-// --------------------------------------------------
-
 
 // --------------------------------------------------
 

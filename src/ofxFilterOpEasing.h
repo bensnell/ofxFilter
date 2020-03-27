@@ -18,7 +18,14 @@ public:
 	void setupParams();
 
 	float easingParam = 0.96;
+    
+    // After how many empty frames will we reset the ease?
+    // -1   never reset
+    // 1    after a single frame
+    // n    after n frames
+    int nEmptyFramesToReset = 1;
 
+    
 
 };
 
@@ -37,5 +44,6 @@ protected:
 	ofxFilterData lastValidData;
 	bool bFirstEase = true;
 
+    int nFramesSinceObs = 0;
 
 };

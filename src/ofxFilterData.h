@@ -179,7 +179,8 @@ public:
 		float approachBuffer = 0.05; // how close until the target is the target speed the observed speed
 		//glm::vec3 accStep;			// max accelerations for t, r, s
 		float accStepPower = 2.0;
-
+        float targetSpeedEaseParam = 0.5;   // range: [0, 1); 0 = no easing of the target speed
+        float accMagEaseParam = 0.995; // how fast does the magnitude of the acceleration ease? range: [0, 1); 0 = no easing (sharp corners), 0.995 = rounded corners
 	};
 	bool converge(ofxFilterData& to, ConvergenceParams& p);
 
