@@ -52,10 +52,14 @@ public:
         // that higher speeds should allow rates to change faster, but
         // lower speeds should change rates slower (this helps with
         // high-frequency noise in the higher-order rates).
-        float fastEaseParam = 0.5;      // should be less
+        float fastEaseParam = 0.1;      // should be less
         float slowEaseParam = 0.95;     // should be more
         // The default param is used when speed is not available.
         float defaultEaseParam = 0.8;
+        // We calculate the appropriate param by comparing the last
+        // speed to reference speeds, which are the maximum speeds for
+        // each channel (translation, rotation, scale).
+        glm::vec3 maxSpeed = { 1.0, 90.0, 1.0 };
         // The ratePower describes how much more easing
         // is applied to rates, the higher their order. (0, +inf)
         // 1 = no difference

@@ -10,6 +10,8 @@ public:
     
     void setup();
     
+    void setFPS(float __fps) { _fps = __fps; }
+    
     // frames per second
     float fps() { return _fps; }
     // seconds per frame
@@ -20,6 +22,8 @@ public:
     // convert seconds to frames
     float s2f() { return _fps; }
     
+    // Convert an easing param from one frame rate to another.
+    float convertEaseParam(float param, float refFPS);
     
     
     

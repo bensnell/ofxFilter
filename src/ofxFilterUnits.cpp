@@ -15,7 +15,7 @@ void ofxFilterUnits::setup() {
     if (bSetup) return;
     
     RUI_NEW_GROUP("ofxFilterUnits");
-    RUI_SHARE_PARAM_WCN("FUnits - FPS", _fps, 0, 1000);
+    RUI_SHARE_PARAM_WCN("FUnits- FPS", _fps, 0, 1000);
     
     
     
@@ -23,6 +23,10 @@ void ofxFilterUnits::setup() {
 }
 
 // --------------------------------------------------
+float ofxFilterUnits::convertEaseParam(float param, float refFPS) {
+    
+    return exp(log(param)*refFPS/fps());
+}
 
 // --------------------------------------------------
 

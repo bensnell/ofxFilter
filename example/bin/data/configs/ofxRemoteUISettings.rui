@@ -3,7 +3,7 @@
 	<OFX_REMOTE_UI_PARAMS>
 		<!-- # ofxFilterUnits ################################################################################# -->
 		<P name="ofxFilterUnits" type="group" />
-		<P name="FUnits - FPS" type="float">60</P>
+		<P name="FUnits- FPS" type="float">240</P>
 		<!-- # ofxFilterGroup - mouse ################################################################################# -->
 		<P name="ofxFilterGroup - mouse" type="group" />
 		<P name="FG_mouse- opList" type="string">easing,add-rate,continuity</P>
@@ -15,7 +15,10 @@
 		<P name="FG_mouse_add-rate_1- RateF Slow Ease" type="float">0.95</P>
 		<P name="FG_mouse_add-rate_1- RateF Default Ease" type="float">0.8</P>
 		<P name="FG_mouse_add-rate_1- RateF Ease Power" type="float">1</P>
-		<P name="FG_mouse_continuity_2- Max Pred Frames" type="int">60</P>
+		<P name="FG_mouse_add-rate_1- RateF Max Trans Speed" type="float">1</P>
+		<P name="FG_mouse_add-rate_1- RateF Max Rot Speed" type="float">90</P>
+		<P name="FG_mouse_add-rate_1- RateF Max Scale Speed" type="float">1</P>
+		<P name="FG_mouse_continuity_2- Max Pred Frames" type="int">240</P>
 		<P name="FG_mouse_continuity_2- Rate Order for Export" type="int">1</P>
 		<P name="FG_mouse_continuity_2- Linked Recon Mode" type="enum">0</P>
 		<P name="FG_mouse_continuity_2- Frames to Unlink" type="int">10</P>
@@ -33,6 +36,7 @@
 		<P name="FG_mouse_continuity_2- Ulnk Friction" type="float">0.95</P>
 		<P name="FG_mouse_continuity_2- Ulnk Friction Rate Power" type="float">2</P>
 		<P name="FG_mouse_continuity_2- Lookahead Frames" type="int">0</P>
+		<P name="FG_mouse_continuity_2- New Link Recon Mode" type="enum">0</P>
 		<P name="FG_mouse_continuity_2- Conv Epsilon Power" type="float">5</P>
 		<P name="FG_mouse_continuity_2- Conv Max Trans Speed" type="float">2</P>
 		<P name="FG_mouse_continuity_2- Conv Max Rot Speed" type="float">90</P>
@@ -48,15 +52,16 @@
 		<!--                                                                                                  -->
 		<!-- ###################################### DISABLED PARAMS ######################################### -->
 		<!--                                                                                                  -->
-		<P name="FG_mouse_add-rate_1- RateF FPS" type="float" disabled="1">60</P>
-		<P name="FG_mouse_continuity_2- Conv FPS" type="float" disabled="1">60</P>
-		<P name="FG_mouse_kalman_0- Smoothness" type="float" disabled="1">5</P>
-		<P name="FG_mouse_kalman_0- Rapidness" type="float" disabled="1">1</P>
+		<P name="FG_mouse_kalman_0- Smoothness" type="float" disabled="1">7</P>
+		<P name="FG_mouse_kalman_0- Rapidness" type="float" disabled="1">0</P>
 		<P name="FG_mouse_kalman_0- Use Accel" type="bool" disabled="1">1</P>
 		<P name="FG_mouse_kalman_0- Use Jerk" type="bool" disabled="1">0</P>
 		<P name="FG_mouse_kalman_0- Predict Empty" type="bool" disabled="1">0</P>
 		<P name="FG_mouse_kalman_0- Max Empty Pred" type="int" disabled="1">10</P>
 		<P name="FG_mouse_kalman_0- Reset After Empty" type="bool" disabled="1">1</P>
+		<P name="FUnits - FPS" type="float" disabled="1">240</P>
+		<P name="FG_mouse_add-rate_1- RateF FPS" type="float" disabled="1">60</P>
+		<P name="FG_mouse_continuity_2- Conv FPS" type="float" disabled="1">60</P>
 		<P name="FG_mouse_continuity_2- Friction" type="float" disabled="1">0.95</P>
 		<P name="FG_mouse_continuity_2- Friction Rate Power" type="float" disabled="1">2</P>
 		<P name="FG_mouse_continuity_2- Friction Rate Mult" type="float" disabled="1">0.95</P>

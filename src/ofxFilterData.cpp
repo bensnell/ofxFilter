@@ -11,8 +11,21 @@ void mat4rate::forward(glm::mat4 _m, RateForwardParams& p, int nElapsedFrames) {
 
     // Calculate the ease params
     glm::vec3 easeParams;
+//    ofLogNotice("mat4rate") << "Ease Params";
     for (int i = 0; i < 3; i++) {
-        easeParams[i] = b[1] ? ofMap(glm::l2Norm((*this)[i][1]), 0.0, 1.0/ofxFilterUnits::one()->fps(), p.slowEaseParam, p.fastEaseParam, true) : p.defaultEaseParam;
+        
+        // Option 1:
+//        easeParams[i] = b[1] ? ofMap(glm::l2Norm((*this)[i][1]),
+//                                     0.0,
+//                                     p.maxSpeed[i]/ofxFilterUnits::one()->fps(),
+//                                     ofxFilterUnits::one()->convertEaseParam(p.slowEaseParam, 60),
+//                                     ofxFilterUnits::one()->convertEaseParam(p.fastEaseParam, 60),
+//                                     true) :
+//        ofxFilterUnits::one()->convertEaseParam(p.defaultEaseParam, 60);
+        
+        // Option 2:
+        easeParams[i] = b[1] ? ofMap(glm::l2Norm((*this)[i][1]), 0.0, p.maxSpeed[i]/ofxFilterUnits::one()->fps(), p.slowEaseParam, p.fastEaseParam, true) : p.defaultEaseParam;
+        easeParams[i] = ofxFilterUnits::one()->convertEaseParam(easeParams[i], 60);
     }
     
 	// Update rates

@@ -36,7 +36,8 @@ void ofxFilterOpEasing::process(ofxFilterData& data) {
     } else {
         // Process the data
         // Apply an ease by lerping data
-        data.lerp(lastValidData, s->easingParam);
+        data.lerp(lastValidData,
+                  ofxFilterUnits::one()->convertEaseParam(s->easingParam, 60));
     }
 
     // Save the last data

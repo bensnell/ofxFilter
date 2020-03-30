@@ -11,6 +11,11 @@ void ofxFilterOpAddRateSettings::setupParams() {
     RUI_SHARE_PARAM_WCN(getID() + "- RateF Slow Ease", forwardParams.slowEaseParam, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- RateF Default Ease", forwardParams.defaultEaseParam, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- RateF Ease Power", forwardParams.easeParamRatePower, 0, 10);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Max Trans Speed", forwardParams.maxSpeed[0], 0, 20);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Max Rot Speed", forwardParams.maxSpeed[1], 0, 360);
+    RUI_SHARE_PARAM_WCN(getID() + "- RateF Max Scale Speed", forwardParams.maxSpeed[2], 0, 20);
+    
+    
     
 }
 

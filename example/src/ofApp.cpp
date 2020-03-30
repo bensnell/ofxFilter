@@ -2,18 +2,21 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	ofSetFrameRate(60);
-    ofSetVerticalSync(false);
 
+    // Set the frame rate of the app and all filters
+    ofSetFrameRate(fps);
+    ofxFilterUnits::one()->setFPS(fps);
+    
+    ofSetVerticalSync(false);
+    
 	// Load the RUI database from file
 	RUI_SET_CONFIGS_DIR("configs");
 	RUI_SETUP();
 	RUI_LOAD_FROM_XML();
 
 	// Setup the filter group
-	filters.setup("mouse", "easing");
-	filters.getFilter("myMouse");
-    
+    filters.setup("mouse", "easing");
+//    filters.getFilter("myMouse");
 }
 
 //--------------------------------------------------------------
@@ -83,8 +86,10 @@ void ofApp::update(){
 void ofApp::draw(){
 	ofBackground(255, 200, 200);
     
-    ofSetColor(0, 50);
-    ofDrawCircle(ofGetHeight()/2, ofGetHeight()/2, ofGetHeight()/2.5);
+    if (bAuto) {
+        ofSetColor(0, 50);
+        ofDrawCircle(ofGetHeight()/2, ofGetHeight()/2, ofGetHeight()/2.5);
+    }
 
 	// Draw a circle at the tip of the mouse
 	ofSetColor(0);

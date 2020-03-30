@@ -17,7 +17,7 @@ public:
 
 	void setupParams();
 
-	float easingParam = 0.96;
+	float easingParam = 0.9;
     
     // After how many empty frames will we reset the ease?
     // -1   never reset

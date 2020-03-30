@@ -35,17 +35,13 @@ public:
 	// observations unlink?
 	int nFramesUnlinkThresh = 10;
 
-	// Similarity threshold for unlinking. (0, 1]
-	// Any similarity below this level must be present for unlinking.
-	// 1	similarity does not factor into unlinking
-	// 0.1	there must be a large amount of dissimilarity present 
-	//			in order to unlink
-	// 0	cannot unlink (do not set to zero)
-	float dissimThreshToUnlink = 1.0;
-
 	// These parameters determine how similarity is calculated
 	// between two different data frames.
 	ofxFilterData::SimilarityParams simParams;
+    
+    // Friction params
+    mat4rate::RateFrictionParams linkedFrictionParams;
+    mat4rate::RateFrictionParams unlinkedFrictionParams;
 
 	// In an unlinked state, how many frames do we look ahead to 
 	// reconcile our current heading with?
@@ -63,10 +59,6 @@ public:
 
 	// Convergence params
 	ofxFilterData::ConvergenceParams convParams;
-    
-    // Friction params
-    mat4rate::RateFrictionParams linkedFrictionParams;
-    mat4rate::RateFrictionParams unlinkedFrictionParams;
     
     // Rate Reduction Params
     mat4rate::RateReduceParams reduceParams;

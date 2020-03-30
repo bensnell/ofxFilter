@@ -30,6 +30,8 @@ void ofxFilterOpContinuitySettings::setupParams() {
     RUI_SHARE_PARAM_WCN(getID() + "- Ulnk Friction Rate Power", unlinkedFrictionParams.ratePower, -1, 10);
     
 	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
+    RUI_SHARE_ENUM_PARAM_WCN(getID() + "- New Link Recon Mode", newLinkReconMode, ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL, ofxFilterData::ReconciliationMode::NUM_OFXFILTERDATA_RECONCILE_MODES-1, reconModes);
+    
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Epsilon Power", convParams.epsilonPower, 0, 12);
     
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Trans Speed", convParams.maxSpeed[0], 0, 20);
@@ -106,29 +108,29 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 
 	// We are currently exporting data
 
-	if (bLinked) {
+    if (bLinked) {
 //        ofLogNotice("OC") << "LINKED";
 
-		if (data.bValid) {
+        if (data.bValid) {
 //            ofLogNotice("OC") << "VALID DATA";
-            
-			if (!bSetFirstPred) {
-				// Set the predicted data for the very first time
-				bSetFirstPred = true;
-				predData = data;
-			}
-			else {
-                
+
+            if (!bSetFirstPred) {
+                // Set the predicted data for the very first time
+                bSetFirstPred = true;
+                predData = data;
+            }
+            else {
+
                 // If many frames have elapsed without valid data, check if the observations
                 // still align with the predictions.
                 if (nFramesSinceObs > s->nFramesUnlinkThresh) {
-                    
+
                     // What would the current prediction be if we proceed without observations?
                     tmpData = predData;
                     tmpData.r.applyFriction(s->linkedFrictionParams); // TODO: Should this be here?
                     tmpData.r.backward();
                     tmpData.setFrameFromRate();
-                    
+
                     // Do predictions differ significantly from observations?
                     if (!tmpData.similar(data, s->simParams)) {
                         // If so, data can no longer be linked. Proceed to unlinked instructions.
@@ -136,44 +138,44 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
                         ofLogNotice("OC") << "Stop Link...";
                     }
                 }
-                
+
                 // If we haven't just unlinked, then reconcile new (known) data with previous
                 // (perhaps uncertain) data.
 //                if (bLinked) predData.reconcile(data, s->existingLinkReconMode);
                 if (bLinked) {
                     predData = data;
                 }
-                
+
                 bFlagAdjustAcc = true;
-			}
-		}
-		else {
+            }
+        }
+        else {
 //            ofLogNotice("OC") << "INVALID DATA";
 
-			// Stop linking if we are over threshold
-			if (nFramesSinceObs > s->nFramesUnlinkThresh) {
-				bLinked = false;
+            // Stop linking if we are over threshold
+            if (nFramesSinceObs > s->nFramesUnlinkThresh) {
+                bLinked = false;
 //                ofLogNotice("OC") << "Stop Link...";
-			}
-			else {
-               
+            }
+            else {
+
                 // Reduce rates if applicable
                 if (bFlagAdjustAcc) {
                     bFlagAdjustAcc = false;
                     predData.r.reduceRates(s->reduceParams);
                     // should these params be different than the unlinked reduction params?
                 }
-                
-				// Apply friction
-				predData.r.applyFriction(s->linkedFrictionParams);
-				// Backpropogate the rates to create a prediction
-				predData.r.backward();
-				// Set the frame from this prediction
-				predData.setFrameFromRate();
-			}
-		}
-	}
 
+                // Apply friction
+                predData.r.applyFriction(s->linkedFrictionParams);
+                // Backpropogate the rates to create a prediction
+                predData.r.backward();
+                // Set the frame from this prediction
+                predData.setFrameFromRate();
+            }
+        }
+    }
+    
 	if (!bLinked) {
 //        ofLogNotice("OC") << "NOT LINKED";
         
