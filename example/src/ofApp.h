@@ -26,11 +26,16 @@ class ofApp : public ofBaseApp{
 		bool bMousePressed = false;
 
 		vector<ofPolyline> lines;
+        vector<vector<bool>> preds;
 
 		bool bFilterActive = false;
 
 		ofxFilterGroup filters;
 
 		bool bLastValid = true;
+    
+    int nMaxMeasurements = 100;
+    
+    bool bPred = true;
 
 };

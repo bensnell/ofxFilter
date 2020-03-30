@@ -65,7 +65,8 @@ public:
 	ofxFilterData::ConvergenceParams convParams;
     
     // Friction params
-    mat4rate::RateFrictionParams frictionParams;
+    mat4rate::RateFrictionParams linkedFrictionParams;
+    mat4rate::RateFrictionParams unlinkedFrictionParams;
     
     // Rate Reduction Params
     mat4rate::RateReduceParams reduceParams;

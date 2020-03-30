@@ -19,11 +19,15 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Thresh Mult", simParams.rateThreshMult, 0, 100);
 	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Weight", simParams.rateWeight, 0, 10);
     
-	RUI_SHARE_PARAM_WCN(getID() + "- Friction", frictionParams.friction, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Mult", frictionParams.rateMult, 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Friction Rate Power", frictionParams.ratePower, 0, 10);
-    RUI_SHARE_PARAM_WCN(getID() + "- Friction Vel", frictionParams.frictionVel, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Friction Acc", frictionParams.frictionAcc, 0, 1);
+    linkedFrictionParams.friction = 0.95;
+    linkedFrictionParams.ratePower = -1;
+	RUI_SHARE_PARAM_WCN(getID() + "- Lnk Friction", linkedFrictionParams.friction, 0, 1);
+	RUI_SHARE_PARAM_WCN(getID() + "- Lnk Friction Rate Power", linkedFrictionParams.ratePower, -1, 10);
+    
+    unlinkedFrictionParams.friction = 0.95;
+    unlinkedFrictionParams.ratePower = 2.0;
+    RUI_SHARE_PARAM_WCN(getID() + "- Ulnk Friction", unlinkedFrictionParams.friction, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Ulnk Friction Rate Power", unlinkedFrictionParams.ratePower, -1, 10);
     
 	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Epsilon Power", convParams.epsilonPower, 0, 12);
@@ -35,7 +39,8 @@ void ofxFilterOpContinuitySettings::setupParams() {
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Time", convParams.approachTime, 0, 20);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Buf", convParams.approachBuffer, 0, 1);
 	RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.accStepPower, 1, 10);
-    RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.targetSpeedEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Conv Target Speed Ease", convParams.targetSpeedEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Mag Ease", convParams.accMagEaseParam, 0, 1);
     
     RUI_SHARE_PARAM_WCN(getID() + "- Red Opp Dir Mult", reduceParams.opposingDirMult, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- Red Aln Dir Mult", reduceParams.alignedDirMult, 0, 1);
@@ -55,17 +60,17 @@ void ofxFilterOpContinuity::setup(ofxFilterOpSettings* _settings) {
 // --------------------------------------------------
 void ofxFilterOpContinuity::process(ofxFilterData& data) {
 
-	ofLogNotice("OC") << "\n\n================================ Frame " << ofGetFrameNum();
-    if (data.bValid) {
-        ofLogNotice("OC") << "\tObserved Pos:\t" << data.translation();
-        if (data.r.isOrderValid(1)) ofLogNotice("OC") << "\tObserved Vel:\t" << data.r[0][1] << "\t\t||vel||= " << glm::l2Norm(data.r[0][1]);
-        if (data.r.isOrderValid(2)) ofLogNotice("OC") << "\tObserved Acc:\t" << data.r[0][2] << "\t\t||acc||= " << glm::l2Norm(data.r[0][2]);;
-    } else {
-        ofLogNotice("OC") << "No observed data";
-    }
-    ofLogNotice("OC") << "\tLast Pos    :\t" << predData.translation();
-    if (predData.r.isOrderValid(1)) ofLogNotice("OC") << "\tLast Vel:\t\t" << predData.r[0][1] << "\t\t||vel||= " << glm::l2Norm(predData.r[0][1]);
-    if (predData.r.isOrderValid(2)) ofLogNotice("OC") << "\tLast Acc:\t\t" << predData.r[0][2] << "\t\t||acc||= " << glm::l2Norm(predData.r[0][2]);;
+//    ofLogNotice("OC") << "\n\n================================ Frame " << ofGetFrameNum();
+//    if (data.bValid) {
+//        ofLogNotice("OC") << "\tObserved Pos:\t" << data.translation();
+//        if (data.r.isOrderValid(1)) ofLogNotice("OC") << "\tObserved Vel:\t" << data.r[0][1] << "\t\t||vel||= " << glm::l2Norm(data.r[0][1]);
+//        if (data.r.isOrderValid(2)) ofLogNotice("OC") << "\tObserved Acc:\t" << data.r[0][2] << "\t\t||acc||= " << glm::l2Norm(data.r[0][2]);;
+//    } else {
+//        ofLogNotice("OC") << "No observed data";
+//    }
+//    ofLogNotice("OC") << "\tLast Pos    :\t" << predData.translation();
+//    if (predData.r.isOrderValid(1)) ofLogNotice("OC") << "\tLast Vel:\t\t" << predData.r[0][1] << "\t\t||vel||= " << glm::l2Norm(predData.r[0][1]);
+//    if (predData.r.isOrderValid(2)) ofLogNotice("OC") << "\tLast Acc:\t\t" << predData.r[0][2] << "\t\t||acc||= " << glm::l2Norm(predData.r[0][2]);;
 
 	if (data.r.size() != 3) {
 		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";
@@ -103,12 +108,10 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 	// We are currently exporting data
 
 	if (bLinked) {
-        
-        ofLogNotice("OC") << "LINKED";
+//        ofLogNotice("OC") << "LINKED";
 
 		if (data.bValid) {
-            
-            ofLogNotice("OC") << "VALID DATA";
+//            ofLogNotice("OC") << "VALID DATA";
             
 			if (!bSetFirstPred) {
 				// Set the predicted data for the very first time
@@ -116,36 +119,42 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 				predData = data;
 			}
 			else {
-
-				// What would the current prediction be if we proceed without observations?
-				tmpData = predData;
-				tmpData.r.applyFriction(s->frictionParams); // TODO: Should this be here?
-				tmpData.r.backward();
-				tmpData.setFrameFromRate();
-
-				// If many frames have elapsed and the observed data differs significantly from 
-				// predicted data, then this can no longer be linked. Proceed to unlinked
-				// instructions
-				if (nFramesSinceObs > s->nFramesUnlinkThresh && !tmpData.similar(data, s->simParams)) {
-					bLinked = false;
-                    ofLogNotice("OC") << "Stop Link...";
-				}
-				else {
-					// Reconcile new (known) data with previous (perhaps uncertain) data.
-					predData.reconcile(data, s->existingLinkReconMode);
-				}
+                
+                // If many frames have elapsed without valid data, check if the observations
+                // still align with the predictions.
+                if (nFramesSinceObs > s->nFramesUnlinkThresh) {
+                    
+                    // What would the current prediction be if we proceed without observations?
+                    tmpData = predData;
+                    tmpData.r.applyFriction(s->linkedFrictionParams); // TODO: Should this be here?
+                    tmpData.r.backward();
+                    tmpData.setFrameFromRate();
+                    
+                    // Do predictions differ significantly from observations?
+                    if (!tmpData.similar(data, s->simParams)) {
+                        // If so, data can no longer be linked. Proceed to unlinked instructions.
+                        bLinked = false;
+                        ofLogNotice("OC") << "Stop Link...";
+                    }
+                }
+                
+                // If we haven't just unlinked, then reconcile new (known) data with previous
+                // (perhaps uncertain) data.
+//                if (bLinked) predData.reconcile(data, s->existingLinkReconMode);
+                if (bLinked) {
+                    predData = data;
+                }
                 
                 bFlagAdjustAcc = true;
 			}
 		}
 		else {
-            
-            ofLogNotice("OC") << "INVALID DATA";
+//            ofLogNotice("OC") << "INVALID DATA";
 
 			// Stop linking if we are over threshold
 			if (nFramesSinceObs > s->nFramesUnlinkThresh) {
 				bLinked = false;
-                ofLogNotice("OC") << "Stop Link...";
+//                ofLogNotice("OC") << "Stop Link...";
 			}
 			else {
                
@@ -153,10 +162,11 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
                 if (bFlagAdjustAcc) {
                     bFlagAdjustAcc = false;
                     predData.r.reduceRates(s->reduceParams);
+                    // should these params be different than the unlinked reduction params?
                 }
                 
 				// Apply friction
-				predData.r.applyFriction(s->frictionParams);
+				predData.r.applyFriction(s->linkedFrictionParams);
 				// Backpropogate the rates to create a prediction
 				predData.r.backward();
 				// Set the frame from this prediction
@@ -166,23 +176,20 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 	}
 
 	if (!bLinked) {
+//        ofLogNotice("OC") << "NOT LINKED";
         
-        ofLogNotice("OC") << "NOT LINKED";
-        
-		if (data.bValid) {
-			// Valid data coming in that must be reconciled with
-            
-            ofLogNotice("OC") << "VALID DATA";
+		if (data.bValid) { // Valid data coming in that must be reconciled with.
+//            ofLogNotice("OC") << "VALID DATA";
 			
 			// Look ahead a number of frames to find the likely observed point
-			// that we will attempt to converge onto
+			// that we will attempt to converge onto.
 			tmpData = data;
 			for (int i = 0; i < s->nLookaheadFrames; i++) {
-                tmpData.r.applyFriction(s->frictionParams);
+                tmpData.r.applyFriction(s->unlinkedFrictionParams);
 				tmpData.r.backward();
 				if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
 			}
-            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation().x;
+//            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation().x;
 
 			// Converge the rates to this frame
 			tmpData2 = predData;
@@ -195,22 +202,19 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			tmpData2.r.backward();
 			tmpData2.setFrameFromRate();
             
-            ofLogNotice("OC") << "\tAcc was " << predData.r[0][2] << " and is now " << tmpData2.r[0][2];
-            ofLogNotice("OC") << "\tVel was " << predData.r[0][1] << " and is now " << tmpData2.r[0][1];
-            ofLogNotice("OC") << "\tPos was " << predData.r[0][0] << " and is now " << tmpData2.r[0][0];
+//            ofLogNotice("OC") << "\tAcc was " << predData.r[0][2] << " and is now " << tmpData2.r[0][2];
+//            ofLogNotice("OC") << "\tVel was " << predData.r[0][1] << " and is now " << tmpData2.r[0][1];
+//            ofLogNotice("OC") << "\tPos was " << predData.r[0][0] << " and is now " << tmpData2.r[0][0];
 
 			// Compare with the observed data
 			if (tmpData2.similar(data, s->simParams)) {
 				// Our predictions are similar to reality, so link up and reconcile new data
 				bLinked = true;
 
-				// TODO: what happens when data doesn't have complete motion params but
-				// the mode instructs all to be copied? should there be a backup?
-				// TODO: Do we reconcile with data or with tmpData? Or is tmpData doing
-				// the reconciling?
+				// Reconcile data observations with predictions.
 				predData.reconcile(data, s->newLinkReconMode);
 
-                ofLogNotice("OC") << "ReLink...";
+//                ofLogNotice("OC") << "ReLink...";
 			}
 			else {
 				// We have been operating on our predictions all along
@@ -220,8 +224,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
 			}
 		}
 		else {
-            
-            ofLogNotice("OC") << "INVALID DATA";
+//            ofLogNotice("OC") << "INVALID DATA";
             
             // Reduce rates if applicable
             if (bFlagAdjustAcc) {
@@ -230,7 +233,7 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
             }
             
 			// No valid data, so we can only depend on predictions
-			predData.r.applyFriction(s->frictionParams);
+			predData.r.applyFriction(s->unlinkedFrictionParams);
 			predData.r.backward();
 			predData.setFrameFromRate();
 		}

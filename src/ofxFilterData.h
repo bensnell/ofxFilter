@@ -73,25 +73,31 @@ public:
     // in higher order rates every frame.
     class RateFrictionParams {
     public:
-        // The minimum amount of friction. This amount is applied to the
-        // velocity. Amounts applied to higher order rates (acc, jerk,
-        // etc.) will be less or equal to this number, depending
-        // on the rateMult and ratePower.
+        
+        // Friction describes the amount of energy retained each
+        // step (frame) in a rate.
         float friction = 0.95;
-        // The rateMult and ratePower decribes how much more friction
-        // is applied to higher order rates.
-        // velocity *=      friction * rateMult^(ratePower*0)
-        // acceleration *=  friction * rateMult^(ratePower*1)
-        // jerk *=          friction * rateMult^(ratePower*2)
-        float rateMult = 0.95;   // range (0, 1]; 1 = no change to higher rates
-        float ratePower = 2.0;  // range [0, +inf); 0 = constant change, 1 = linear change
         
-        
-        
-        float frictionVel = 0.95;
-        float frictionAcc = 0.8;
-        // TODO: interpolation type (to higher orders)
-        
+        // In the progressive mode, friction gets progressively
+        // higher for higher order rates by a power function.
+        // range: [-1, +inf)
+        // -1   none
+        //          vel *=  friction^0
+        //          acc *=  friction^0
+        //          jerk *= friction^0
+        // 0    constant
+        //          vel *=  friction^1
+        //          acc *=  friction^1
+        //          jerk *= friction^1
+        // 1    contantly progressive with order
+        //          vel *=  friction^1
+        //          acc *=  friction^2
+        //          jerk *= friction^3
+        // 2    exponentially progressive by a power of 2
+        //          vel *=  friction^1
+        //          acc *=  friction^3
+        //          jerk *= friction^5
+        float ratePower = 2.0;
     };
 	void applyFriction(RateFrictionParams& p);
     
@@ -174,11 +180,11 @@ public:
 		float epsilonPower = 5;
 		float frameRate = 240.0;	// frames per second
 		// Maximum reasonable speed we would want a point to move (for t, r, s)
-		glm::vec3 maxSpeed = { 1.0, 90.0, 1.0 };
+		glm::vec3 maxSpeed = { 2.0, 90.0, 1.0 };
 		float approachTime = 1.0;	// how many seconds until we begin slowing down for the approach?
-		float approachBuffer = 0.05; // how close until the target is the target speed the observed speed
+		float approachBuffer = 0.1; // how close until the target is the target speed the observed speed
 		//glm::vec3 accStep;			// max accelerations for t, r, s
-		float accStepPower = 2.0;
+		float accStepPower = 1.25;
         float targetSpeedEaseParam = 0.5;   // range: [0, 1); 0 = no easing of the target speed
         float accMagEaseParam = 0.995; // how fast does the magnitude of the acceleration ease? range: [0, 1); 0 = no easing (sharp corners), 0.995 = rounded corners
 	};
