@@ -7,7 +7,6 @@ void ofxFilterOpAddRateSettings::setupParams() {
 
 	RUI_SHARE_PARAM_WCN(getID() + "- Order", order, 1, 4);
 	RUI_SHARE_PARAM_WCN(getID() + "- Frames to Reset", nFramesToResetRate, 0, 120);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF FPS", forwardParams.frameRate, 0, 1000);
     RUI_SHARE_PARAM_WCN(getID() + "- RateF Fast Ease", forwardParams.fastEaseParam, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- RateF Slow Ease", forwardParams.slowEaseParam, 0, 1);
     RUI_SHARE_PARAM_WCN(getID() + "- RateF Default Ease", forwardParams.defaultEaseParam, 0, 1);

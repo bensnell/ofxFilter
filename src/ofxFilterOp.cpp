@@ -10,7 +10,6 @@ void ofxFilterOp::setup(ofxFilterOpSettings* _settings) {
 
 	// Update the settings
 	settings = _settings;
-
 }
 
 // --------------------------------------------------

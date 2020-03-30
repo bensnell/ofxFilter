@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxFilterUtils.h"
+#include "ofxFilterUnits.h"
 
 // transformation matrix rate
 class mat4rate {
@@ -42,7 +43,6 @@ public:
 	// Apply nFrames forward passes to update the rate.
     class RateForwardParams {
     public:
-        float frameRate = 240.0;    // frames per second
         // How much do we ease new rates? [0, 1)
         // 0    no easing
         // 0.5  half old, half new rate
@@ -178,7 +178,6 @@ public:
 	class ConvergenceParams {
 	public:
 		float epsilonPower = 5;
-		float frameRate = 240.0;	// frames per second
 		// Maximum reasonable speed we would want a point to move (for t, r, s)
 		glm::vec3 maxSpeed = { 2.0, 90.0, 1.0 };
 		float approachTime = 1.0;	// how many seconds until we begin slowing down for the approach?

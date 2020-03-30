@@ -5,6 +5,7 @@
 #include "ofxCv.h"
 #include "ofxFilterUtils.h"
 #include "ofxFilterData.h"
+#include "ofxFilterUnits.h"
 
 // This class holds the settings for a filter operator
 class ofxFilterOpSettings {

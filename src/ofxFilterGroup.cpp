@@ -12,6 +12,9 @@ ofxFilterGroup::~ofxFilterGroup() {
 
 // --------------------------------------------------
 void ofxFilterGroup::setup(string _name, string _opList) {
+    
+    // Setup filter units if not yet setup
+    ofxFilterUnits::one()->setup();
 
 	// Create a group for all of the parameters
 	name = _name;
@@ -73,7 +76,6 @@ ofxFilter* ofxFilterGroup::getFilter(string key, bool bCreateIfNone) {
 		ofxFilter* filter = new ofxFilter();
 		filter->setup(opSettings);
 		filters[key] = filter;
-		ofLogNotice() << "Creating filter " << key << " with address " << filters[key];
 		return filters[key];
 	}
 

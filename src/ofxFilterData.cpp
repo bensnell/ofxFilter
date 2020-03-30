@@ -12,7 +12,7 @@ void mat4rate::forward(glm::mat4 _m, RateForwardParams& p, int nElapsedFrames) {
     // Calculate the ease params
     glm::vec3 easeParams;
     for (int i = 0; i < 3; i++) {
-        easeParams[i] = b[1] ? ofMap(glm::l2Norm((*this)[i][1]), 0.0, 1.0/p.frameRate, p.slowEaseParam, p.fastEaseParam, true) : p.defaultEaseParam;
+        easeParams[i] = b[1] ? ofMap(glm::l2Norm((*this)[i][1]), 0.0, 1.0/ofxFilterUnits::one()->fps(), p.slowEaseParam, p.fastEaseParam, true) : p.defaultEaseParam;
     }
     
 	// Update rates
@@ -175,14 +175,14 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
         float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
         if (isnan(k1)) k1 = 1.0;
         // TimeToTarget is in seconds.
-        float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
+        float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / ofxFilterUnits::one()->fps();
 //        ofLogNotice("FD") << "\t\tTime to Target\t" << timeToTarget;
 
         // ------------- VELOCITY MAGNITUDE (SPEED) ---------------
         
         // Determine the target speed.
         // First, what is the maximum allowable speed per frame?
-        float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
+        float maxSpeedPerFrame = p.maxSpeed[i] / ofxFilterUnits::one()->fps();
         // Calculate a parameter that defines how close we are to target in the range [0, 1],
         // where 0 = close and 1 = far.
         float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
@@ -227,7 +227,7 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
         // This is the target change in acc:
         glm::vec3 targetJerk = targetAcc - r[i][2];
         // The maximum allowable change in acc is:
-        float maxAccStepPerFrame = p.maxSpeed[i] / pow(p.frameRate, p.accStepPower);
+        float maxAccStepPerFrame = p.maxSpeed[i] / pow(ofxFilterUnits::one()->fps(), p.accStepPower);
         // The magnitude of our change is:
         float jerkMagnitude = min(glm::l2Norm(targetJerk), maxAccStepPerFrame);
         // And the real change is: (check for a zero jerk to prevent NAN)
@@ -274,11 +274,11 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 //        // Next, determine approximately how long it would take to approach the target.
 //        float k0 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(to.r[i][1])), -1, 1, 2, 1, true);
 //        float k1 = ofMap(glm::dot(glm::normalize(r[i][1]), glm::normalize(heading)), -1, 1, 2, 1, true);
-//        float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / p.frameRate;
+//        float timeToTarget = (k0 * k1 * (glm::l2Norm(heading) / glm::l2Norm(r[i][1]))) / ofxFilterUnits::one()->fps();
 //        ofLogNotice("FD") << "\t\tTime to Target\t" << timeToTarget;
 //
 //        // Determine the target speed
-//        float maxSpeedPerFrame = p.maxSpeed[i] / p.frameRate;
+//        float maxSpeedPerFrame = p.maxSpeed[i] / ofxFilterUnits::one()->fps();
 //        float paramToMaxSpeed = ofMap(timeToTarget / p.approachTime, p.approachBuffer, 1, 0, 1, true);
 //
 //        float prevSpeed = glm::l2Norm(to.r[i][1]);
@@ -299,7 +299,7 @@ bool ofxFilterData::converge(ofxFilterData& to, ConvergenceParams& p) {
 //
 //        // Calculate the required jerk
 //        glm::vec3 targetJerk = targetAcc - r[i][2];
-//        float maxAccStepPerFrame = p.maxSpeed[i] / pow(p.frameRate, p.accStepPower);
+//        float maxAccStepPerFrame = p.maxSpeed[i] / pow(ofxFilterUnits::one()->fps(), p.accStepPower);
 //        float jerkMagnitude = min(glm::l2Norm(targetJerk), maxAccStepPerFrame);
 //        // check for a zero jerk to prevent NAN
 //        glm::vec3 jerk = (glm::l2Norm(targetJerk) == 0.0) ? glm::vec3(0,0,0) : (glm::normalize(targetJerk) * jerkMagnitude);
