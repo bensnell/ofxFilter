@@ -26,7 +26,7 @@ void ofApp::update(){
 
         if (bAuto) {
             // Add an automatic circle measurement
-            if (bMousePressed && (ofGetFrameNum()%60 > 12)) {
+            if (bMousePressed && (ofGetFrameNum()%int(ofxFilterUnits::one()->fps()) > 12)) {
                 glm::vec2 position;
                 position.x = cos(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
                 position.y = sin(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
