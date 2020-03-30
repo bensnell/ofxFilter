@@ -36,6 +36,6 @@ class ofApp : public ofBaseApp{
     
     int nMaxMeasurements = 100;
     
-    bool bPred = true;
+    bool bAuto = false;
 
 };

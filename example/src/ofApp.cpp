@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 	ofSetFrameRate(60);
+    ofSetVerticalSync(false);
 
 	// Load the RUI database from file
 	RUI_SET_CONFIGS_DIR("configs");
@@ -20,33 +21,38 @@ void ofApp::update(){
 
     bool bOneDim = false;
     
-    if (bFilterActive) {
+    bool bPred = true;
+    if (bFilterActive || bAuto) {
 
-//        // Add an automatic circle measurement
-//        if (bMousePressed && (ofGetFrameNum()%60 > 4)) {
-//            glm::vec2 position;
-//            position.x = cos(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
-//            position.y = sin(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
-//            filters.getFilter("myMouse")->process(position);
-//            bPred = false;
-//        }
-//        else {
-//            filters.getFilter("myMouse")->process();
-//            bPred = true;
-//        }
+        if (bAuto) {
+            // Add an automatic circle measurement
+            if (bMousePressed && (ofGetFrameNum()%60 > 12)) {
+                glm::vec2 position;
+                position.x = cos(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
+                position.y = sin(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
+                filters.getFilter("myMouse")->process(position);
+                bPred = false;
+            }
+            else {
+                filters.getFilter("myMouse")->process();
+                bPred = true;
+            }
+            
+        } else {
         
-        // Add a measurement by mouse
-        if (bMousePressed) {
-            float rad = 5;
-            glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
-            position /= glm::vec2(ofGetHeight(), ofGetHeight());
-            if (bOneDim) position.y = 0.0;
-            filters.getFilter("myMouse")->process(position);
-            bPred = false;
-        }
-        else {
-            filters.getFilter("myMouse")->process();
-            bPred = true;
+            // Add a measurement by mouse
+            if (bMousePressed) {
+                float rad = 5;
+                glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
+                position /= glm::vec2(ofGetHeight(), ofGetHeight());
+                if (bOneDim) position.y = 0.0;
+                filters.getFilter("myMouse")->process(position);
+                bPred = false;
+            }
+            else {
+                filters.getFilter("myMouse")->process();
+                bPred = true;
+            }
         }
         
 
@@ -112,6 +118,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    if (key == ' ') bAuto = !bAuto;
 
 }
 
