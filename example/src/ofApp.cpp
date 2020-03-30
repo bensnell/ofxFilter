@@ -22,15 +22,9 @@ void ofApp::update(){
     
     if (bFilterActive) {
 
-//        // Add a measurement
-//        if (bMousePressed) {
-////        if (bMousePressed && (ofGetFrameNum()%60 > 4)) {
-////        if (ofGetFrameNum()%60 > 12) {
-//            float rad = 5;
-//            glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
-//            position /= glm::vec2(ofGetHeight(), ofGetHeight());
-//            if (bOneDim) position.y = 0.0;
-//
+//        // Add an automatic circle measurement
+//        if (bMousePressed && (ofGetFrameNum()%60 > 4)) {
+//            glm::vec2 position;
 //            position.x = cos(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
 //            position.y = sin(ofGetElapsedTimef()*2.0)/2.5 + 0.5;
 //            filters.getFilter("myMouse")->process(position);
@@ -41,7 +35,7 @@ void ofApp::update(){
 //            bPred = true;
 //        }
         
-        // Add a measurement
+        // Add a measurement by mouse
         if (bMousePressed) {
             float rad = 5;
             glm::vec2 position = glm::vec2(ofGetMouseX() + ofRandom(-rad, rad), ofGetMouseY() + ofRandom(-rad, rad));
@@ -54,6 +48,7 @@ void ofApp::update(){
             filters.getFilter("myMouse")->process();
             bPred = true;
         }
+        
 
 		// Make a prediction
 		bool bValid = filters.getFilter("myMouse")->isDataValid();
