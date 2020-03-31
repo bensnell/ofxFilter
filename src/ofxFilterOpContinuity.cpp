@@ -142,9 +142,9 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
                 // If we haven't just unlinked, then reconcile new (known) data with previous
                 // (perhaps uncertain) data.
                 if (bLinked) predData.reconcile(data, s->existingLinkReconMode);
-                if (bLinked) {
-                    predData = data;
-                }
+//                if (bLinked) {
+//                    predData = data;
+//                }
 
                 bFlagAdjustAcc = true;
             }
