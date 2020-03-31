@@ -2,70 +2,52 @@
 
 #include "ofMain.h"
 #include "ofxRemoteUIServer.h"
-#include "ofxCv.h"
+#include "ofxFilterUtils.h"
+#include "ofxFilterOp.h"
+#include "ofxFilterOpEasing.h"
+#include "ofxFilterOpKalman.h"
+#include "ofxFilterOpAddRate.h"
+#include "ofxFilterOpContinuity.h"
 
-enum ofxFilterMode {
-	FILTER_NONE = 0,
-	FILTER_KALMAN,
-	FILTER_EASING,
-	NUM_FILTERS
-};
-
+// A filter manipulates realtime data using a series of ops (operations)
 class ofxFilter {
 public:
     
     ofxFilter();
     ~ofxFilter();
+	
 
-	// Set this filter's mode
-	void setMode(ofxFilterMode _mode);
-	// Get the names of the filter modes
-	static vector<string> getModeNames() { return { "none", "kalman", "easing" }; }
+	// Setup this filter. Use the settings to determine which layers
+	// and how many should be used
+	void setup(vector<ofxFilterOpSettings*>& _settings);
 
-	// Set params
-	void setParamsKalman(float smoothness, float rapidness, bool bUseAccel = false, bool bUseJerk = false);
-	void setParamsEasing(float _easingParam);
-    
-	// Add a measurement
-	void add(float scalar);
-	void add(glm::vec2 position);
-	void add(glm::vec3 position);
-	void add(glm::quat quaternion);
-	void add(glm::mat4x4& frame);
+	// Process a value and receive the processed value
+	float process(float in);
+	glm::vec2 process(glm::vec2 in);
+	glm::vec3 process(glm::vec3 in);
+	glm::quat process(glm::quat in);
+	glm::mat4 process(glm::mat4 in);
 
-	// Add a null measurement (make another prediction; move the kalman filter
-	// forward one time step without a measurement)
-	void add();
+	// Process an absent measurement
+	glm::mat4 process();
 
-	// Get a prediction
-	float getScalar();				// Scalar filtering
-	glm::vec2 getPosition2D();		// 2D filtering
-	glm::vec3 getPosition();		// 3D filtering
-	glm::quat getOrientation();		// Quaternion filtering
-	glm::mat4x4 getFrame();			// Frame filtering (position, orientation, no scaling)
+	// Get the last processed value
+	float getScalar();
+	glm::vec2 getPosition2D();
+	glm::vec3 getPosition();
+	glm::quat getOrientation();
+	glm::mat4 getFrame() { return frame.m; }
 
+	// Is the last processed value valid?
+	bool isDataValid() { return frame.bValid; }
+	
 
 private:
 
-	ofxFilterMode mode = FILTER_KALMAN;
+	// All operators (layers)
+	vector<ofxFilterOp*> ops;
 
-	// Last samples
-	glm::mat4x4 lastFrame;
+	// Last processed frame
+	ofxFilterData frame;
 
-	// Frame utils 
-	ofxCv::KalmanPosition kalmanPosition;
-	ofxCv::KalmanEuler kalmanOrientation;
-
-	float easingParam = 0.95;
-	glm::vec3 easedPosition;
-	glm::quat easedQuaternion;
-	bool bFirstEase = true;
 };
-
-void decomposeMat4x4(glm::mat4x4& _mat, glm::vec3& _outPosition, glm::quat& _outQuaternion);
-void composeMat4x4(glm::vec3& _position, glm::quat& _quaternion, glm::mat4x4& _outMat);
-glm::quat quatConvert(ofQuaternion& _q);
-glm::vec3 getTranslation(glm::mat4x4& a);
-glm::vec3 getXAxis(glm::mat4x4& a);
-glm::vec3 getYAxis(glm::mat4x4& a);
-glm::vec3 getZAxis(glm::mat4x4& a);

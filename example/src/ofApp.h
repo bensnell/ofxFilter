@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxFilter.h"
+#include "ofxFilterGroup.h"
 #include "ofxRemoteUIServer.h"
 
 class ofApp : public ofBaseApp{
@@ -22,13 +22,20 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-
-		ofxFilter filter;
 		
 		bool bMousePressed = false;
 
-		ofPolyline line;
+		vector<ofPolyline> lines;
+        vector<vector<bool>> preds;
 
 		bool bFilterActive = false;
+
+		ofxFilterGroup filters;
+
+		bool bLastValid = true;
+    
+    int nMaxMeasurements = 100;
+    
+    bool bAuto = false;
 
 };

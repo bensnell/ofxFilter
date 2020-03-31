@@ -8,31 +8,31 @@ public:
     ofxFilterGroup();
     ~ofxFilterGroup();
 
-	glm::mat4x4 applyFilter(string _key, glm::mat4x4 _frame);
-	float applyFilter(string _key, float _scalar);
+	// Setup the group with a name
+	// All filters within this group will use the same number, type and
+	// order of operators. The opList is a string of comma-delimited
+	// op names. For example, "kalman,continuity" describes a two layer
+	// filter with a kalman, then a continuity.
+	void setup(string name, string opList);
 
-	void setupParams(string name);
-	void setup();
+	bool filterExists(string key);
+	ofxFilter* getFilter(string key, bool bCreateIfNone = true);
+
+	
 
 
 private:
 
-	string groupName = "";
+	string name = "";
 	string ruiGroupName = ""; // cannot contain ':' --> use '-' instead
+	string opList = "";
 
-	ofxFilter* getFilter(string _key);
+	// These are the settings for all filters in this group
+	vector<ofxFilterOpSettings*> opSettings;
+
+	// These are all of the filters in a dict with key value of their name
 	map<string, ofxFilter*> filters;
-
-	ofxFilterMode mode = FILTER_KALMAN;
-	float smoothness = 0.001;
-	float smoothnessExp = 3; // (0.1)^3
-	float rapidness = 0.01;
-	float rapidnessExp = 1; // (0.1)^1
-	bool bUseAccel = false;
-	float easingParam = 0.95;
 
 	// To receive updates
 	void paramsUpdated(RemoteUIServerCallBackArg& arg);
-	void updateAllParams();
-	void updateParams(ofxFilter* filter);
 };

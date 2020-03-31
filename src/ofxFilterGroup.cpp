@@ -1,10 +1,3 @@
-//
-//  ofxFilterGroup.cpp
-//  g5_002
-//
-//  Created by Ben Snell on 1/17/19.
-//
-
 #include "ofxFilterGroup.h"
 
 // --------------------------------------------------
@@ -18,55 +11,81 @@ ofxFilterGroup::~ofxFilterGroup() {
 }
 
 // --------------------------------------------------
-void ofxFilterGroup::setupParams(string name) {
-	groupName = name;
+void ofxFilterGroup::setup(string _name, string _opList) {
+    
+    // Setup filter units if not yet setup
+    ofxFilterUnits::one()->setup();
 
-	ruiGroupName = "Filter Group- " + groupName;
+	// Create a group for all of the parameters
+	name = _name;
+	ruiGroupName = "ofxFilterGroup - " + name;
+	string logPrefix = "FG_" + name;
+	opList = _opList;
 	RUI_NEW_GROUP(ruiGroupName);
-	string modeNames[] = { "None", "Kalman", "Easing" };
-	RUI_SHARE_ENUM_PARAM_WCN("FG" + name + "- Mode", mode, FILTER_NONE, FILTER_EASING, modeNames);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Smooth Exponent", smoothnessExp, 0, 12);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Rapid Exponent", rapidnessExp, 0, 12);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Use Accel", bUseAccel);
-	RUI_SHARE_PARAM_WCN("FG" + name + "- Easing Param", easingParam, 0, 1);
+	RUI_SHARE_PARAM_WCN("FG_" + name + "- " + "opList", opList);
 
-}
+	// Now that the operator list is loaded, create a list of settings
+	// and initialize the parameters of these settings.
+	vector<string> opListParsed = ofSplitString(opList, ",");
+	opSettings.clear();
+	int depth = -1;
+	for (int i = 0; i < opListParsed.size(); i++) {
+		string type = ofToLower(opListParsed[i]);
+		depth++;
 
-// --------------------------------------------------
-void ofxFilterGroup::setup() {
-
-	updateAllParams();
+		ofxFilterOpSettings* settings;
+		if (type == "none") {
+			settings = new ofxFilterOpSettings();
+		}
+		else if (type == "easing") {
+			settings = new ofxFilterOpEasingSettings();
+		}
+		else if (type == "kalman") {
+			settings = new ofxFilterOpKalmanSettings();
+		}
+		else if (type == "add-rate") {
+			settings = new ofxFilterOpAddRateSettings();
+		}
+		else if (type == "continuity") {
+			// This must follow an "add-rate"
+			if (i == 0 || ofToLower(opListParsed[i - 1]) != "add-rate") {
+				ofLogWarning("ofxFilterGroup") << "Continuity operators must follow Add-Rate";
+			}
+			settings = new ofxFilterOpContinuitySettings();
+		}
+		else {
+			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
+			depth--;
+			continue;
+		}
+		settings->setup(logPrefix, depth);
+		opSettings.push_back(settings);
+	}
 
 	ofAddListener(RUI_GET_OF_EVENT(), this, &ofxFilterGroup::paramsUpdated);
 
 }
 
 // --------------------------------------------------
-glm::mat4x4 ofxFilterGroup::applyFilter(string _key, glm::mat4x4 _frame) {
-	ofxFilter* f = getFilter(_key);
-	f->add(_frame);
-	return f->getFrame();
-}
+ofxFilter* ofxFilterGroup::getFilter(string key, bool bCreateIfNone) {
 
-// --------------------------------------------------
-float ofxFilterGroup::applyFilter(string _key, float _scalar) {
-	ofxFilter* f = getFilter(_key);
-	f->add(_scalar);
-	return f->getScalar();
-}
-
-// --------------------------------------------------
-ofxFilter* ofxFilterGroup::getFilter(string _key) {
-
-	if (filters.find(_key) == filters.end()) {
-		// couldn't find it; create a new one
-		ofxFilter* f = new ofxFilter();
-		// Update params
-		updateParams(f);
-		// Save the filter
-		filters[_key] = f;
+	if (filterExists(key)) {
+		return filters[key];
 	}
-	return filters[_key];
+	else if (bCreateIfNone) {
+		ofxFilter* filter = new ofxFilter();
+		filter->setup(opSettings);
+		filters[key] = filter;
+		return filters[key];
+	}
+
+	return NULL;
+}
+
+// --------------------------------------------------
+bool ofxFilterGroup::filterExists(string key) {
+
+	return filters.find(key) != filters.end();
 }
 
 // --------------------------------------------------
@@ -74,25 +93,7 @@ void ofxFilterGroup::paramsUpdated(RemoteUIServerCallBackArg& arg) {
 	if (arg.action != CLIENT_UPDATED_PARAM) return;
 	if (arg.group.compare(ruiGroupName) != 0) return;
 
-	updateAllParams();
-}
-
-// --------------------------------------------------
-void ofxFilterGroup::updateAllParams() {
-
-	smoothness = powf(0.1, smoothnessExp);
-	rapidness = powf(0.1, rapidnessExp);
-
-	for (auto it = filters.begin(); it != filters.end(); it++) {
-		updateParams(it->second);
-	}
-}
-
-// --------------------------------------------------
-void ofxFilterGroup::updateParams(ofxFilter* filter) {
-	filter->setMode(mode);
-	filter->setParamsKalman(smoothness, rapidness, bUseAccel);
-	filter->setParamsEasing(easingParam);
+	// TODO?
 }
 
 // --------------------------------------------------
