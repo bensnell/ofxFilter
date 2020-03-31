@@ -6,7 +6,9 @@ This addon is a realtime filter capable of smoothing and filtering streams of da
 
 The base form of the data operated on is a transformation matrix (`glm::mat4`). The matrix describes all properties of a reference frame, including position, orientation and scale. However, not all of these attributes need be used. A filter can process a scalar, 2D point, 3D point, etc. using the appropriate `process()` function (see more below).
 
-This filter is also capable of handling invalid input (when inputs are missing or obscured). See below for a use case.
+This filter is also capable of handling invalid input (when inputs are missing or obscured). In the example below, ofxFilter is used to "fill in" gaps of missing data. The "filling in" is in green; blue represents known data or data produced while observations are available.
+
+![example-demo.gif](example-demo.gif)
 
 ## Requirements
 
@@ -87,9 +89,7 @@ void draw() {
 }
 ```
 
-For a complete demo, see the example provided in the folder `example`.
-
-
+For a complete demo, see the example provided in the folder `example`. 
 
 ## Parameters
 
