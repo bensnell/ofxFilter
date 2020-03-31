@@ -37,7 +37,5 @@ class ofApp : public ofBaseApp{
     int nMaxMeasurements = 100;
     
     bool bAuto = false;
-    
-    int fps = 240;
 
 };

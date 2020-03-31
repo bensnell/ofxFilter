@@ -80,8 +80,8 @@ public:
 protected:
 
 	ofxFilterData predData;	// predicted data
-	ofxFilterData tmpData;	// temporary data #1
-	ofxFilterData tmpData2;	// temporary data #2
+	ofxFilterData tmpData;	// temporary data
+	ofxFilterData convData;	// converged data (if available)
 	ofxFilterData outData;	// output data (final)
 
 
@@ -92,7 +92,6 @@ protected:
 	// If true, then there is no prediction underway. The output is the 
 	// observation.
 	bool bLinked = true;
-    bool bLinkedLast = true;
 
 	// Have we set the very first prediction?
 	bool bSetFirstPred = false;
@@ -100,7 +99,9 @@ protected:
 	// Number of frames since the last observation
 	int nFramesSinceObs = 1;
 
-    bool bFlagAdjustAcc = false;
+    // Should we adjust acceleration? This is the same as whether
+    // the last data was valid
+    bool bLastDataValid = false;
 
 
 };

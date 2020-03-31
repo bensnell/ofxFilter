@@ -3,9 +3,8 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-    // Set the frame rate of the app and all filters
-    ofSetFrameRate(fps);
-    ofxFilterUnits::one()->setFPS(fps);
+    // Set the frame rate of all filters
+    ofxFilterUnits::one()->setFPS(240);
     
     ofSetVerticalSync(false);
     
@@ -21,6 +20,11 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
+    // Update the frame rate of the app if it doesn't match the filters
+    if (int(round(ofGetTargetFrameRate())) != int(round(ofxFilterUnits::one()->fps()))) {
+        ofSetFrameRate(int(round(ofxFilterUnits::one()->fps())));
+    }
 
     bool bOneDim = false;
     
