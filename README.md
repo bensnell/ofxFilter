@@ -44,28 +44,28 @@ ofApp.cpp
 void setup() {
   
   // Setup the Remote UI
-	RUI_SET_CONFIGS_DIR("configs");
-	RUI_SETUP();
-	RUI_LOAD_FROM_XML();
+  RUI_SET_CONFIGS_DIR("configs");
+  RUI_SETUP();
+  RUI_LOAD_FROM_XML();
   
-	// Setup the Filter Group with a name and operator types. 
+  // Setup the Filter Group with a name and operator types. 
   // All filters in this group will process data using a kalman op, then an add-rate op,
   // then a continuity op, using the same settings.
-	group.setup("myGroupName", "kalman,add-rate,continuity");
+  group.setup("myGroupName", "kalman,add-rate,continuity");
   
-	// Filters are created as soon as they are queried. No need to create ahead of time.
+  // Filters are created as soon as they are queried. No need to create ahead of time.
 }
 
 void update() {
   
   // Update the first filter with new data, for example, mouse coordinates.
   if (mousePressed) {
-		// If valid data is available, the process with it.
-		glm::vec2 position = {mouseX, mouseY};
+    // If valid data is available, the process with it.
+    glm::vec2 position = {mouseX, mouseY};
     filters.getFilter("mouseFilter")->process(position);
   } else {
-	  // If new data is not available, we can process the filter without, and yield a 
-	  // prediction as output.
+    // If new data is not available, we can process the filter without, and yield a 
+    // prediction as output.
     filters.getFilter("mouseFilter")->process();
   }
   
