@@ -82,8 +82,8 @@ public:
         // step (frame) in a rate.
         float friction = 0.95;
         
-        // In the progressive mode, friction gets progressively
-        // higher for higher order rates by a power function.
+        // Friction gets progressively higher for higher order
+        // rates by a power function.
         // range: [-1, +inf)
         // -1   none
         //          vel *=  friction^0
@@ -93,11 +93,11 @@ public:
         //          vel *=  friction^1
         //          acc *=  friction^1
         //          jerk *= friction^1
-        // 1    contantly progressive with order
+        // 1    linearly increasing with order
         //          vel *=  friction^1
         //          acc *=  friction^2
         //          jerk *= friction^3
-        // 2    exponentially progressive by a power of 2
+        // 2    exponentially increasing by a power of 2
         //          vel *=  friction^1
         //          acc *=  friction^3
         //          jerk *= friction^5
@@ -151,7 +151,7 @@ public:
 		glm::vec3 thresh = { 0.01, 3, 0.01 };	// thresholds of t[0], r[0], s[0]
 		glm::vec3 mix = { 1, 0, 0 };			// mix of t, r, s
 		int nRates = 1;							// how many rates to include (1 = t[0],r[0],s[0] only)
-		float rateThreshMult = 10.0;			// how much are the rate thresholds muliplies of the original threshold
+		float rateThreshMult = 10.0;			// how much are the rate thresholds multiples of the original threshold
 		float rateWeight = 0;					// 0 = no weighting; 1 = linearly decreasing, etc. (how different rates are mixed)
 	};
 	bool similar(ofxFilterData& d, SimilarityParams& p);
@@ -186,7 +186,6 @@ public:
 		glm::vec3 maxSpeed = { 2.0, 90.0, 1.0 };
 		float approachTime = 1.0;	// how many seconds until we begin slowing down for the approach?
 		float approachBuffer = 0.1; // how close until the target is the target speed the observed speed
-		//glm::vec3 accStep;			// max accelerations for t, r, s
 		float accStepPower = 1.25;
         float targetSpeedEaseParam = 0.5;   // range: [0, 1); 0 = no easing of the target speed
         float accMagEaseParam = 0.995; // how fast does the magnitude of the acceleration ease? range: [0, 1); 0 = no easing (sharp corners), 0.995 = rounded corners

@@ -92,6 +92,7 @@ protected:
 	// If true, then there is no prediction underway. The output is the 
 	// observation.
 	bool bLinked = true;
+    bool bLinkedLast = true;
 
 	// Have we set the very first prediction?
 	bool bSetFirstPred = false;

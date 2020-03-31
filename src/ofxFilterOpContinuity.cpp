@@ -135,13 +135,13 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
                     if (!tmpData.similar(data, s->simParams)) {
                         // If so, data can no longer be linked. Proceed to unlinked instructions.
                         bLinked = false;
-                        ofLogNotice("OC") << "Stop Link...";
+//                        ofLogNotice("OC") << "Stop Link...";
                     }
                 }
 
                 // If we haven't just unlinked, then reconcile new (known) data with previous
                 // (perhaps uncertain) data.
-//                if (bLinked) predData.reconcile(data, s->existingLinkReconMode);
+                if (bLinked) predData.reconcile(data, s->existingLinkReconMode);
                 if (bLinked) {
                     predData = data;
                 }
@@ -176,69 +176,69 @@ void ofxFilterOpContinuity::process(ofxFilterData& data) {
         }
     }
     
-	if (!bLinked) {
-//        ofLogNotice("OC") << "NOT LINKED";
-        
-		if (data.bValid) { // Valid data coming in that must be reconciled with.
-//            ofLogNotice("OC") << "VALID DATA";
-			
-			// Look ahead a number of frames to find the likely observed point
-			// that we will attempt to converge onto.
-			tmpData = data;
-			for (int i = 0; i < s->nLookaheadFrames; i++) {
-                tmpData.r.applyFriction(s->unlinkedFrictionParams);
-				tmpData.r.backward();
-				if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
-			}
-//            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation().x;
+    if (!bLinked) {
+        //        ofLogNotice("OC") << "NOT LINKED";
 
-			// Converge the rates to this frame
-			tmpData2 = predData;
+        if (data.bValid) { // Valid data coming in that must be reconciled with.
+            //            ofLogNotice("OC") << "VALID DATA";
+
+            // Look ahead a number of frames to find the likely observed point
+            // that we will attempt to converge onto.
+            tmpData = data;
+            for (int i = 0; i < s->nLookaheadFrames; i++) {
+                tmpData.r.applyFriction(s->unlinkedFrictionParams);
+                tmpData.r.backward();
+                if (i == (s->nLookaheadFrames - 1)) tmpData.setFrameFromRate();
+            }
+            //            ofLogNotice("OC") << "\tConverge to :\t" << tmpData.translation().x;
+
+            // Converge the rates to this frame
+            tmpData2 = predData;
             if (!tmpData2.converge(tmpData, s->convParams)) {
                 // If convergence is not possible, proceed as if it were,
                 // using the tmpData to generate a prediction.
             }
 
-			// Generate a prediction and set this frame
-			tmpData2.r.backward();
-			tmpData2.setFrameFromRate();
-            
-//            ofLogNotice("OC") << "\tAcc was " << predData.r[0][2] << " and is now " << tmpData2.r[0][2];
-//            ofLogNotice("OC") << "\tVel was " << predData.r[0][1] << " and is now " << tmpData2.r[0][1];
-//            ofLogNotice("OC") << "\tPos was " << predData.r[0][0] << " and is now " << tmpData2.r[0][0];
+            // Generate a prediction and set this frame
+            tmpData2.r.backward();
+            tmpData2.setFrameFromRate();
 
-			// Compare with the observed data
-			if (tmpData2.similar(data, s->simParams)) {
-				// Our predictions are similar to reality, so link up and reconcile new data
-				bLinked = true;
+            //            ofLogNotice("OC") << "\tAcc was " << predData.r[0][2] << " and is now " << tmpData2.r[0][2];
+            //            ofLogNotice("OC") << "\tVel was " << predData.r[0][1] << " and is now " << tmpData2.r[0][1];
+            //            ofLogNotice("OC") << "\tPos was " << predData.r[0][0] << " and is now " << tmpData2.r[0][0];
 
-				// Reconcile data observations with predictions.
-				predData.reconcile(data, s->newLinkReconMode);
+            // Compare with the observed data
+            if (tmpData2.similar(data, s->simParams)) {
+                // Our predictions are similar to reality, so link up and reconcile new data
+                bLinked = true;
 
-//                ofLogNotice("OC") << "ReLink...";
-			}
-			else {
-				// We have been operating on our predictions all along
-				predData = tmpData2;
-                
+                // Reconcile data observations with predictions.
+                predData.reconcile(data, s->newLinkReconMode);
+
+                //                ofLogNotice("OC") << "ReLink...";
+            }
+            else {
+                // We have been operating on our predictions all along
+                predData = tmpData2;
+
                 bFlagAdjustAcc = true;
-			}
-		}
-		else {
-//            ofLogNotice("OC") << "INVALID DATA";
-            
+            }
+        }
+        else {
+            //            ofLogNotice("OC") << "INVALID DATA";
+
             // Reduce rates if applicable
             if (bFlagAdjustAcc) {
                 bFlagAdjustAcc = false;
                 predData.r.reduceRates(s->reduceParams);
             }
-            
-			// No valid data, so we can only depend on predictions
-			predData.r.applyFriction(s->unlinkedFrictionParams);
-			predData.r.backward();
-			predData.setFrameFromRate();
-		}
-	}
+
+            // No valid data, so we can only depend on predictions
+            predData.r.applyFriction(s->unlinkedFrictionParams);
+            predData.r.backward();
+            predData.setFrameFromRate();
+        }
+    }
 
 	// The output data will be the predictions
 	outData = predData;

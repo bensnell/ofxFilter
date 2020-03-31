@@ -28,6 +28,8 @@ A layer is called an `ofxFilterOp`. Available layers include (where the accompan
 
 A group of filters that share the same settings (types, locations and quantity of ops) can be contained with an `ofxFilterGroup` dictionary, where each filter is accessible via a key string.
 
+A filter's operators are defined by a string containing each op key in order, separated by a comma. For example, `"kalman,add-rate,continuity"` describes the filter containing a Kalman operator, followed by an Add Rate operator, followed by a Continuity operator.
+
 ## Usage
 
 ofApp.h
@@ -161,85 +163,75 @@ Relevant parameters include:
 
 `Rate Order for Export` : At what rate order will this being exporting?
 
-`Linked Recon Mode` : How is newly observed data reconciled while linked?
+`Frames To Unlink` : After how many empty frames will predictions unlink from observations?
 
-`Frames To Unlink` : 
+`LookaheadFrames` : In an unlinked state, how many frames do we look ahead to reconcile our current heading with?
 
-`LookaheadFrames` : 
+`Linked Recon Mode` : How is newly observed data reconciled while linked? Modes include: COPY_ALL, COPY_FRAME, and COPY_FRAME_AND_UPDATE_RATE.
 
-`New Link Recon Mode` : 
+`New Link Recon Mode` : How is newly linked data reconciled with observational data? (same options as above).
 
 #### SimilarityParams
 
-`Trans Thresh` : 
+These parameters describe how a similarity decision is made. Given two pieces of data, the calculation that determines whether they are similar is governed by these parameters.
 
-`Trans Mix` : 
+`Trans Thresh` : What is the threshold (in meters) by which two pieces of data can be consdiered similar, from a translational perspective?
 
-`Rot Thresh` : 
+`Trans Mix` : How much of translational similarity is used to judge overall similarity? This value is relative to the other mix parameters.
 
-`Rot Mix` : 
+`Rot Thresh` : What is the threshold (in degrees) by which two pieces of data can be consdiered similar, from a rotational perspective?
 
-`Scale Thresh` : 
+`Rot Mix` : How much of rotational similarity is used to judge overall similarity? This value is relative to the other mix parameters.
 
-`Scale Mix` : 
+`Scale Thresh` : What is the threshold (unitless) by which two pieces of data can be consdiered similar, from a scalar perspective?
 
-`Num Rates` : 
+`Scale Mix` : How much of scalar similarity is used to judge overall similarity? This value is relative to the other mix parameters.
 
-`Rate Thresh Mult` : 
+`Num Rates` : How many rates do we compare for similarity? Range: [1, nRates]. 1 = position only; 2 = position and velocity, etc.
 
-`Rate Weight` : 
+`Rate Thresh Mult` : How much are the higher order rate thresholds multiples of the original thresholds? Range: [1, +inf)
 
-#### LinkedFrictionParams
+`Rate Weight` : How much are higher order rates weighted differently? Range: [0, +inf)
 
-`Friction` : 
+#### FrictionParams
 
-`Friction Rate Power`:
+These parameters describe how friction is applied. There are two sets of friction parameters: one for the linked state and another for the unlinked state.
 
-#### UnlinkedFrictionParams
+`Friction` : The fraction of energy retained each step (frame).
 
-`Friction` : 
-
-`Friction Rate Power`:
+`Friction Rate Power` : Friction gets progressively higher for higher order rates by a power function. This parameter describes how friction changes with rate order. Range: [-1, +inf). -1 = no change; 0 = constant value; 1 = linearly increasing with order; 2 = exponentially increasing by a power of 2 with order.
 
 #### ConvergenceParams
 
-`Epsilon Power` : 
+These parameters describe how unlinked data attempts to converge with observed data (when observed data is available). Once converged, the predicted data relinks with observations.
 
-`Max Trans Speed` : 
+`Epsilon Power` : What exponent (negative power of 10) describes a practical zero?
 
-`Max Rot Speed` : 
+`Max Trans Speed` : Maximum reasonable translational speed (meters/sec) one would want data to move during convergence.
 
-`Max Scale Speed` : 
+`Max Rot Speed` : Maximum reasonable rotational speed (degrees/sec) one would want data to move during convergence.
 
-`Approach Time` : 
+`Max Scale Speed` : Maximum reasonable scalar speed (/sec) one would want data to move during convergence.
 
-`Approach Buf` : 
+`Approach Time` : How many seconds before convergence should data begin to slow down to the observed data's speed?
 
-`Acc Step Power` : 
+`Approach Buf` : Fraction of the approach time until the data's speed is the observed target's speed. Range: [0, 1).
 
-`Target Speed Ease` : 
+`Acc Step Power` : How do speed thresholds differ for higher order rates? If this is 1, then higher order rates have the same maximum magnitude as those provided (`max __ speed`). If > 1, then higher order rates have a  smaller maximum magnitude than those provided. Range: [1, +inf).
 
-`Acc Mag Ease` : 
+`Target Speed Ease` : How much should the target speed be eased? Easing will prevent jumps in acceleration. Range: [0, 1). 0 = no easing; 0.5 = half ease. Note: this is one of the only easing parameters that is not normalized to framerate. Normalizing this results in poor quality performance.
+
+`Acc Mag Ease` : How fast does the magnitude of the acceleration ease? Range: [0, 1). 0 = no easing; 0.995 = rounded corners. 
 
 #### RateReduceParams
 
-`Opp Dir Mult` : 
+When data transitions from being observed to being predicted, high order rates (acceleration+) must be reduced to prevent undesireable motion artifacts. These parameters describe how much it is reduced and when.
 
-`Aln Dir Mult` : 
+`Opp Dir Mult` : By what fraction should a rate be reduced when its direction opposes the next lowest rate's direction? Range: [0, 1].
 
-`Power` : 
+`Aln Dir Mult` : By what fraction should a rate be reduced when its direction is aligned with the next lowest rate's direction? Range: [0, 1].
 
-
-
-
-
-
-
-
-
-
-
-
+`Power` : This exponent sensitizes the range between opposing and aligned rates. A value < 1 makes orthogonal rates closer to `Aln Dir Mult`, while a value > 1 makes orthogonal rates closer to `Opp Dir Mult`. Range: (0, +inf).
 
 
 
