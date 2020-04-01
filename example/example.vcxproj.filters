@@ -178,6 +178,9 @@
     <ClCompile Include="..\src\ofxFilterOpAddRate.cpp">
       <Filter>local_addons\ofxFilter\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ofxFilterUnits.cpp">
+      <Filter>local_addons\ofxFilter\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -1482,6 +1485,9 @@
       <Filter>local_addons\ofxFilter\src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxFilterOpAddRate.h">
+      <Filter>local_addons\ofxFilter\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxFilterUnits.h">
       <Filter>local_addons\ofxFilter\src</Filter>
     </ClInclude>
   </ItemGroup>

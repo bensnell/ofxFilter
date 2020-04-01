@@ -194,6 +194,7 @@
     <ClCompile Include="..\src\ofxFilterOpContinuity.cpp" />
     <ClCompile Include="..\src\ofxFilterOpEasing.cpp" />
     <ClCompile Include="..\src\ofxFilterOpKalman.cpp" />
+    <ClCompile Include="..\src\ofxFilterUnits.cpp" />
     <ClCompile Include="..\src\ofxFilterUtils.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
@@ -253,6 +254,7 @@
     <ClInclude Include="..\src\ofxFilterOpContinuity.h" />
     <ClInclude Include="..\src\ofxFilterOpEasing.h" />
     <ClInclude Include="..\src\ofxFilterOpKalman.h" />
+    <ClInclude Include="..\src\ofxFilterUnits.h" />
     <ClInclude Include="..\src\ofxFilterUtils.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\OpenFrameworks\addons\ofxOpenCv\src\ofxCvBlob.h" />
