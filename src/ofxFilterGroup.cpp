@@ -68,18 +68,20 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 
 // --------------------------------------------------
 ofxFilter* ofxFilterGroup::getFilter(string key, bool bCreateIfNone) {
+	bool bExists = filterExists(key);
+	if (!bExists && !bCreateIfNone) return NULL;
 
-	if (filterExists(key)) {
-		return filters[key];
-	}
-	else if (bCreateIfNone) {
+	// Create a filter if it doesn't exist
+	if (!bExists) {
 		ofxFilter* filter = new ofxFilter();
 		filter->setup(opSettings);
 		filters[key] = filter;
-		return filters[key];
 	}
 
-	return NULL;
+	// Save that this filter was called for
+	filtersCalled[key] = true;
+
+	return filters[key];
 }
 
 // --------------------------------------------------
@@ -97,6 +99,16 @@ void ofxFilterGroup::paramsUpdated(RemoteUIServerCallBackArg& arg) {
 }
 
 // --------------------------------------------------
+void ofxFilterGroup::processRemaining() {
 
+	for (auto& it : filters) {
+		if (filtersCalled[it.first]) { // was called
+			filtersCalled[it.first] = false;
+		}
+		else { // was not called, so process it without data
+			it.second->process();
+		}
+	}
+}
 
 // --------------------------------------------------

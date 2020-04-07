@@ -17,7 +17,12 @@ public:
 
 	bool filterExists(string key);
 	ofxFilter* getFilter(string key, bool bCreateIfNone = true);
+	map<string, ofxFilter*> getFilters() { return filters; }
 
+	// Process all filters which have not been requested since the last time
+	// this frunction was called.
+	void processRemaining();
+	
 	
 
 
@@ -35,4 +40,7 @@ private:
 
 	// To receive updates
 	void paramsUpdated(RemoteUIServerCallBackArg& arg);
+
+	// Which filters have been called?
+	map<string, bool> filtersCalled;
 };
