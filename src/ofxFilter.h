@@ -36,6 +36,7 @@ public:
 	glm::vec2 getPosition2D();
 	glm::vec3 getPosition();
 	glm::quat getOrientation();
+	glm::vec3 getFrameScale();
 	glm::mat4 getFrame() { return frame.m; }
 
 	// Is the last processed value valid?
@@ -49,5 +50,10 @@ private:
 
 	// Last processed frame
 	ofxFilterData frame;
+
+	// What measures (translation, rotation, scale) are valid?
+	// And by consequence, what measures need to be calculated?
+	glm::bvec3 validMeasures = glm::bvec3(false, false, false);
+	glm::mat4 _process(glm::mat4 in);
 
 };

@@ -57,6 +57,7 @@ protected:
 
 	// Initialize the filters (resets their states)
 	void initFilters();
+	bool bInitFilters = false; // Have filters been initialized?
 
 	int nEmptyPred = 0;
 

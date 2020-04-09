@@ -141,6 +141,9 @@ public:
 	glm::vec3 translation();
 	glm::quat rotation();
 	glm::vec3 scale();
+	// Which of these measures is valid? (being operated upon)
+	// This must be set externally.
+	glm::bvec3 validMeasures = glm::bvec3(false, false, false);
 
 	// Lerp to another data object
 	void lerp(ofxFilterData& to, float amt);

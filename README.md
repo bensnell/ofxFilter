@@ -237,7 +237,7 @@ When data transitions from being observed to being predicted, high order rates (
 
 ## Troubleshooting
 
-### Orientations produce strange arifacts
+### Orientations produce strange artifacts
 
 This addon is untested on orientation/rotation data. Contributions and bug-fixes are welcome.
 
@@ -245,9 +245,9 @@ This addon is untested on orientation/rotation data. Contributions and bug-fixes
 
 TODO
 
+### It doesn't run as fast as expected
 
+The `kalman` operator is the most computationally intensive. On a computer with the following specs, the app was limited to processing 150 simultaneous 3D points at 240 fps:
 
-
-
-
+- Processor	Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz, 3600 Mhz, 8 Core(s), 8 Logical Processor(s)
 
