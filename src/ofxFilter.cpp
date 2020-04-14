@@ -32,6 +32,9 @@ void ofxFilter::setup(vector<ofxFilterOpSettings*>& _settings) {
 		else if (type == "continuity") {
 			op = new ofxFilterOpContinuity();
 		}
+		else if (type == "axes") {
+			op = new ofxFilterOpAxes();
+		}
 		else {
 			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			continue;
@@ -85,6 +88,7 @@ glm::mat4 ofxFilter::_process(glm::mat4 in) {
 	frame.m = in;
 	frame.bValid = true;
 	frame.validMeasures = validMeasures;
+	bProcessed = true;
 	for (int i = 0; i < ops.size(); i++) {
 		ops[i]->process(frame); // TODO: lock so we aren't in the middle of changing data
 	}
@@ -96,6 +100,7 @@ glm::mat4 ofxFilter::process() {
 	// Use the last data (frame)
 	frame.bValid = false;
 	frame.validMeasures = validMeasures;
+	bProcessed = true;
 	for (int i = 0; i < ops.size(); i++) {
 		ops[i]->process(frame);
 	}

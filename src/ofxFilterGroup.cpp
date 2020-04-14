@@ -53,6 +53,9 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 			}
 			settings = new ofxFilterOpContinuitySettings();
 		}
+		else if (type == "axes") {
+			settings = new ofxFilterOpAxesSettings();
+		}
 		else {
 			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			depth--;
@@ -78,9 +81,6 @@ ofxFilter* ofxFilterGroup::getFilter(string key, bool bCreateIfNone) {
 		filters[key] = filter;
 	}
 
-	// Save that this filter was called for
-	filtersCalled[key] = true;
-
 	return filters[key];
 }
 
@@ -101,13 +101,11 @@ void ofxFilterGroup::paramsUpdated(RemoteUIServerCallBackArg& arg) {
 // --------------------------------------------------
 void ofxFilterGroup::processRemaining() {
 
+	// Process all filters that have not been processed yet.
+	// This will call process on empty (invalid) data as input.
 	for (auto& it : filters) {
-		if (filtersCalled[it.first]) { // was called
-			filtersCalled[it.first] = false;
-		}
-		else { // was not called, so process it without data
-			it.second->process();
-		}
+		if (!it.second->wasProcessed()) it.second->process();
+		it.second->resetProcessFlag();
 	}
 }
 

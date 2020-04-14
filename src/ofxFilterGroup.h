@@ -41,6 +41,4 @@ private:
 	// To receive updates
 	void paramsUpdated(RemoteUIServerCallBackArg& arg);
 
-	// Which filters have been called?
-	map<string, bool> filtersCalled;
 };

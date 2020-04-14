@@ -8,6 +8,7 @@
 #include "ofxFilterOpKalman.h"
 #include "ofxFilterOpAddRate.h"
 #include "ofxFilterOpContinuity.h"
+#include "ofxFilterOpAxes.h"
 
 // A filter manipulates realtime data using a series of ops (operations)
 class ofxFilter {
@@ -42,6 +43,9 @@ public:
 	// Is the last processed value valid?
 	bool isDataValid() { return frame.bValid; }
 	
+	// Flags for keeping track of whether this filter has been processed.
+	bool wasProcessed() { return bProcessed; }
+	void resetProcessFlag() { bProcessed = false; }
 
 private:
 
@@ -55,5 +59,8 @@ private:
 	// And by consequence, what measures need to be calculated?
 	glm::bvec3 validMeasures = glm::bvec3(false, false, false);
 	glm::mat4 _process(glm::mat4 in);
+
+	// Has the last frame been processed with valid data?
+	bool bProcessed = false;
 
 };
