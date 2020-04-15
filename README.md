@@ -27,6 +27,7 @@ A layer is called an `ofxFilterOp`. Available layers include (where the accompan
 - Kalman (`kalman`): This layer applies a kalman filter to the data. 
 - Add Rate (`add-rate`): This layer adds differentiable rates (of order `n`) to the `mat4`, in the form of a `mat4rate` object. Rates describe the change of a value from one frame to another. Rates are not calculated by default, since not all ops require them. When an op requires rates, place this layer before it.
 - Continuity (`continuity`): This layer is capable of making predictions to "fill in" missing data. Is is also capable of "merging" predicted data with known data, hence the name "continuity." It is designed to intelligently fill in gaps when new information is unavailable. It must follow the `add-rate` operator with `order=3`.
+- Axes (`axes`): This layer can adjust the coordinate system axes by changing the handedness (right or left) of a coordinate system and the up vector (X, Y, or Z) of that system.
 
 A group of filters that share the same settings (types, locations and quantity of ops) can be contained with an `ofxFilterGroup` dictionary, where each filter is accessible via a key string.
 
@@ -232,6 +233,26 @@ When data transitions from being observed to being predicted, high order rates (
 `Aln Dir Mult` : By what fraction should a rate be reduced when its direction is aligned with the next lowest rate's direction? Range: [0, 1].
 
 `Power` : This exponent sensitizes the range between opposing and aligned rates. A value < 1 makes orthogonal rates closer to `Aln Dir Mult`, while a value > 1 makes orthogonal rates closer to `Opp Dir Mult`. Range: (0, +inf).
+
+### ofxFilterOpAxes
+
+In order to adjust a coordinate system's axes, the reference (source) handedness and up vector must be know. Supply those values in the first two variables:
+
+`Src Handedness`: Source handedness of the coordinate system (for reference).
+
+`Src Up Vector`: Source up vector of the coordinate system (for reference).
+
+`Convert Handedness`: Boolean indicating whether handedness should be converted to the destination handedness.
+
+`Dst Handedness`: Desired handedness of the system.
+
+`Convert Up Vector`: Boolean indicating whether up vector should be converted to the destination up vector.
+
+`Dst Up Vector`: Desired up vector of the system.
+
+
+
+
 
 
 
