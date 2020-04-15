@@ -34,7 +34,7 @@ void ofxFilterOpKalman::setup(ofxFilterOpSettings* _settings) {
 }
 
 // --------------------------------------------------
-void ofxFilterOpKalman::process(ofxFilterData& data) {
+void ofxFilterOpKalman::_process(ofxFilterData& data) {
 
 	ofxFilterOpKalmanSettings* s = static_cast<ofxFilterOpKalmanSettings*>(settings);
 	

@@ -22,7 +22,7 @@ void ofxFilterOpAxes::setup(ofxFilterOpSettings* _settings) {
 }
 
 // --------------------------------------------------
-void ofxFilterOpAxes::process(ofxFilterData& data) {
+void ofxFilterOpAxes::_process(ofxFilterData& data) {
 
     // If we don't have valid data, return
     if (!data.bValid) return;

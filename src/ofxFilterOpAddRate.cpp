@@ -27,7 +27,7 @@ void ofxFilterOpAddRate::setup(ofxFilterOpSettings* _settings) {
 }
 
 // --------------------------------------------------
-void ofxFilterOpAddRate::process(ofxFilterData& data) {
+void ofxFilterOpAddRate::_process(ofxFilterData& data) {
 
     ofxFilterOpAddRateSettings* s = static_cast<ofxFilterOpAddRateSettings*>(settings);
 

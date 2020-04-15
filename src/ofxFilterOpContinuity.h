@@ -63,7 +63,9 @@ public:
     // Rate Reduction Params
     mat4rate::RateReduceParams reduceParams;
 
-	long maxLifespan() { return nMaxPredFrames + 1; }
+protected:
+
+	long _maxLifespan() { return nMaxPredFrames + 1; }
 
 };
 
@@ -73,10 +75,10 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
 
 	ofxFilterData predData;	// predicted data
 	ofxFilterData tmpData;	// temporary data

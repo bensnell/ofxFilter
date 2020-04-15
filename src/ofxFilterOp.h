@@ -31,7 +31,12 @@ public:
 	// What is the maximum lifespan of this operator (in # frames)?
 	// By default, it is 1 frame without valid data.
 	// -1 will achieve an "infinite" lifespan effect.
-	virtual long maxLifespan() { return 1; }
+	long maxLifespan() { 
+		return bEnabled ? _maxLifespan() : 1;
+	}
+
+	// Is this operator enabled?
+	bool bEnabled = true;
 
 protected:
 
@@ -43,6 +48,8 @@ protected:
 	int depth = 0;
 	// ID of this layer
 	string ID = "";
+
+	virtual long _maxLifespan() { return 1; }
 
 };
 
@@ -58,12 +65,14 @@ public:
 	// Setup this operator
 	virtual void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	virtual void process(ofxFilterData& data);
+	void process(ofxFilterData& data);
 
 	virtual void clear() {};
 	
-//protected:
+protected:
+
+	// Apply this operator to data and get transformed data as output
+	virtual void _process(ofxFilterData& data);
 
 	// Parameters
 	ofxFilterOpSettings* settings;

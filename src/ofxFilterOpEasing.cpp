@@ -18,7 +18,7 @@ void ofxFilterOpEasing::setup(ofxFilterOpSettings* _settings) {
 }
 
 // --------------------------------------------------
-void ofxFilterOpEasing::process(ofxFilterData& data) {
+void ofxFilterOpEasing::_process(ofxFilterData& data) {
 
     // Increment the number of frames
     nFramesSinceObs++;

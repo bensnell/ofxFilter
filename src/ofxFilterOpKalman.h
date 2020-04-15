@@ -45,11 +45,10 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
  
 	ofxCv::KalmanPosition kt;	// kalman translation
 	ofxCv::KalmanEuler kr;		// kalman rotation

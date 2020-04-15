@@ -24,8 +24,7 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 	RUI_NEW_GROUP(ruiGroupName);
 	RUI_SHARE_PARAM_WCN("FG_" + name + "- " + "opList", opList);
 
-	// Now that the operator list is loaded, create a list of settings
-	// and initialize the parameters of these settings.
+	// Now that the operator list is loaded, create a list of settings.
 	vector<string> opListParsed = ofSplitString(opList, ",");
 	opSettings.clear();
 	int depth = -1;
@@ -61,8 +60,16 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 			depth--;
 			continue;
 		}
-		settings->setup(logPrefix, depth);
 		opSettings.push_back(settings);
+	}
+
+	// Setup parameters to enable each operator
+	for (int i = 0; i < opSettings.size(); i++) {
+		RUI_SHARE_PARAM_WCN(logPrefix + "_" + opSettings[i]->getType() + "_" + ofToString(i) + "- Enabled", opSettings[i]->bEnabled);
+	}
+	// Setup operator-specific parameters
+	for (int i = 0; i < opSettings.size(); i++) {
+		opSettings[i]->setup(logPrefix, i);
 	}
 
 	ofAddListener(RUI_GET_OF_EVENT(), this, &ofxFilterGroup::paramsUpdated);

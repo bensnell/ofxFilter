@@ -36,7 +36,9 @@ public:
     // apply an each to the rates.
     mat4rate::RateForwardParams forwardParams;
 
-	long maxLifespan() { return order + 1; }
+protected:
+
+	long _maxLifespan() { return order + 1; }
 };
 
 class ofxFilterOpAddRate : public ofxFilterOp {
@@ -45,10 +47,10 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
 
     bool bLastDataValid = false;
     
