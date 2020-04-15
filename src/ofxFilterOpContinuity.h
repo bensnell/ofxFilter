@@ -63,6 +63,8 @@ public:
     // Rate Reduction Params
     mat4rate::RateReduceParams reduceParams;
 
+	long maxLifespan() { return nMaxPredFrames + 1; }
+
 };
 
 class ofxFilterOpContinuity : public ofxFilterOp {
@@ -73,9 +75,6 @@ public:
 
 	// Apply this operator to data and get transformed data as output
 	void process(ofxFilterData& data);
-
-
-
 
 protected:
 

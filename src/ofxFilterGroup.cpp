@@ -110,3 +110,49 @@ void ofxFilterGroup::processRemaining() {
 }
 
 // --------------------------------------------------
+long ofxFilterGroup::maxLifespan() {
+	// Calculate and return the max lifespan.
+	// -1 (infinite) lifespans will be passed through.
+	long lifespan = 1;
+	long out = 1;
+	for (int i = 0; i < opSettings.size(); i++) {
+		lifespan = opSettings[i]->maxLifespan();
+		if (lifespan < 0) return -1;
+		out = max(out, lifespan);
+	}
+	return out;
+}
+
+// --------------------------------------------------
+void ofxFilterGroup::removeUnused() {
+
+	// Get the maximum lifespan across all operators
+	long maxLS = maxLifespan();
+	// If the lifespan is infinite, do not proceed.
+	if (maxLS < 0) return;
+
+	// Delete any filters that have exceeded their lifespan
+	auto it = filters.begin();
+	while (it != filters.end()) {
+		if (it->second->getNumInvalidOutputs() > maxLS) {
+			it = filters.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+}
+
+// --------------------------------------------------
+
+
+// --------------------------------------------------
+
+
+// --------------------------------------------------
+
+
+// --------------------------------------------------
+
+
+// --------------------------------------------------

@@ -39,6 +39,13 @@ public:
 		s.resize(size, { 0,0,0 });
 	}
 
+	void clear() {
+		b.clear();
+		t.clear();
+		r.clear();
+		s.clear();
+	}
+
 	
 	// Apply nFrames forward passes to update the rate.
     class RateForwardParams {
@@ -206,6 +213,11 @@ public:
     
 	// Set the internal matrix from the rate
 	bool setFrameFromRate();
+
+	// -----------------------------
+	
+	// Clear this data
+	void clear();
 
 
 protected:

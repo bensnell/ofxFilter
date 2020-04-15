@@ -18,12 +18,16 @@ public:
 	bool filterExists(string key);
 	ofxFilter* getFilter(string key, bool bCreateIfNone = true);
 	map<string, ofxFilter*> getFilters() { return filters; }
+	int size() { return filters.size(); }
 
 	// Process all filters which have not been requested since the last time
 	// this frunction was called.
 	void processRemaining();
 	
-	
+	// Filters that have not been processed recently should be deleted
+	// (culled). Call this to delete filters that haven't exported
+	// valid data recently.
+	void removeUnused();
 
 
 private:
@@ -40,5 +44,8 @@ private:
 
 	// To receive updates
 	void paramsUpdated(RemoteUIServerCallBackArg& arg);
+
+	// What is the maximum lifespan of constituent filters?
+	long maxLifespan();
 
 };

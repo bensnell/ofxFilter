@@ -28,6 +28,11 @@ public:
 
 	virtual void setupParams();
 
+	// What is the maximum lifespan of this operator (in # frames)?
+	// By default, it is 1 frame without valid data.
+	// -1 will achieve an "infinite" lifespan effect.
+	virtual long maxLifespan() { return 1; }
+
 protected:
 
 	// Operator Type
@@ -55,6 +60,8 @@ public:
 
 	// Apply this operator to data and get transformed data as output
 	virtual void process(ofxFilterData& data);
+
+	virtual void clear() {};
 	
 //protected:
 

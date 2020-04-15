@@ -85,25 +85,32 @@ glm::mat4 ofxFilter::process(glm::mat4 in) {
 
 // --------------------------------------------------
 glm::mat4 ofxFilter::_process(glm::mat4 in) {
+	// This processes valid data
 	frame.m = in;
 	frame.bValid = true;
 	frame.validMeasures = validMeasures;
 	bProcessed = true;
+	//lastValidInput = ofGetElapsedTimeMillis();
 	for (int i = 0; i < ops.size(); i++) {
 		ops[i]->process(frame); // TODO: lock so we aren't in the middle of changing data
 	}
+	//if (frame.bValid) lastValidOutput = ofGetElapsedTimeMillis();
+	nInvalidOutputs = frame.bValid ? 0 : (nInvalidOutputs + 1);
 	return frame.m;
 }
 
 // --------------------------------------------------
 glm::mat4 ofxFilter::process() {
-	// Use the last data (frame)
+	// This processes invalid data. 
+	// Use the last data (frame) to pass through
 	frame.bValid = false;
 	frame.validMeasures = validMeasures;
 	bProcessed = true;
 	for (int i = 0; i < ops.size(); i++) {
 		ops[i]->process(frame);
 	}
+	//if (frame.bValid) lastValidOutput = ofGetElapsedTimeMillis();
+	nInvalidOutputs = frame.bValid ? 0 : (nInvalidOutputs + 1);
 	return frame.m; // should this return null if it's invalid?
 }
 
@@ -136,3 +143,24 @@ glm::quat ofxFilter::getOrientation() {
 glm::vec3 ofxFilter::getFrameScale() {
 	return getScale(frame.m);
 }
+
+// --------------------------------------------------
+void ofxFilter::clear() {
+
+	for (int i = 0; i < ops.size(); i++) {
+		if (ops[i] != NULL) {
+			ops[i]->clear();
+			delete ops[i];
+		}
+	}
+	ops.clear();
+	frame.clear();
+	validMeasures = glm::bvec3(false, false, false);
+	bProcessed = false;
+	nInvalidOutputs = 0;
+}
+
+// --------------------------------------------------
+
+
+// --------------------------------------------------

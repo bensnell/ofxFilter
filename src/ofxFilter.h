@@ -47,6 +47,16 @@ public:
 	bool wasProcessed() { return bProcessed; }
 	void resetProcessFlag() { bProcessed = false; }
 
+	// What are the last times at which valid data was seen, either
+	// as input or output? (in milliseconds)
+	//uint64_t& getLastValidInputTime() { return lastValidInput; }
+	//uint64_t& getLastValidOutputTime() { return lastValidOutput; }
+	// How many frames of invalid input have passed?
+	uint64_t& getNumInvalidOutputs() { return nInvalidOutputs; }
+
+	// Delete all operators. Reset.
+	void clear();
+
 private:
 
 	// All operators (layers)
@@ -62,5 +72,10 @@ private:
 
 	// Has the last frame been processed with valid data?
 	bool bProcessed = false;
+
+	// What is the last time valid data was processed?
+	//uint64_t lastValidInput = 0;
+	//uint64_t lastValidOutput = 0;
+	uint64_t nInvalidOutputs = 0;
 
 };
