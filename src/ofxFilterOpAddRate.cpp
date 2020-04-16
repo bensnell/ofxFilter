@@ -31,12 +31,12 @@ void ofxFilterOpAddRate::_process(ofxFilterData& data) {
 
     ofxFilterOpAddRateSettings* s = static_cast<ofxFilterOpAddRateSettings*>(settings);
 
-    // Initialize the rate parameters if the order is not the same
-    if ((data.r.size() != s->order) ||
+    // If the last valid data's rate is not initialized, then initialize it
+    if ((lastValidData.r.size() != s->order) || 
         (data.bValid && !bLastDataValid && (s->nFramesToResetRate >= 0) && (nFramesSinceValidData > s->nFramesToResetRate))) {
         lastValidData.r.init(s->order);
     }
-    
+
     if (data.bValid) {
         
         // Set the new data
@@ -52,6 +52,9 @@ void ofxFilterOpAddRate::_process(ofxFilterData& data) {
     } else {
         // No valid data, so don't change output or save anything
     }
+
+    // Ensure that the output has the correct rate size, even if it isn't valid
+    if (data.r.size() != s->order) data.r.init(s->order);
     
     // Increment the number of elapsed frames
     nFramesSinceValidData++;

@@ -29,13 +29,10 @@ public:
 	}
 
 	void init(int size) {
-		b.clear();
+		clear();
 		b.resize(size, false);
-		t.clear();
 		t.resize(size, { 0,0,0 });
-		r.clear();
 		r.resize(size, { 0,0,0 });
-		s.clear();
 		s.resize(size, { 0,0,0 });
 	}
 

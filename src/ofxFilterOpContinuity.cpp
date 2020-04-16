@@ -62,7 +62,7 @@ void ofxFilterOpContinuity::setup(ofxFilterOpSettings* _settings) {
 void ofxFilterOpContinuity::_process(ofxFilterData& data) {
 	if (data.r.size() != 3) {
 		ofLogError("ofxFilterOpContinuity") << "Requires exactly 3rd order rate (motion) params. Add the op 'add-rate' prior.";
-		return;
+        return;
 	}
 
 	// Get the settings for this operator
