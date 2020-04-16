@@ -14,17 +14,31 @@ public:
 	ofxFilterOpSettings() {};
 	~ofxFilterOpSettings() {};
 
-	// Setup the name of these settings and the depth of the operator
-	void setup(string _name, int _depth) {
+	// First, add the depth of this setting
+	void addDepth(int _depth) {
+		depths.push_back(_depth);
+	}
+
+	// Second, these settings
+	void setup(string _name) {
+		if (!name.empty() && name.compare(_name) != 0) {
+			ofLogWarning("ofxFilterOpSettings") << "Wrappable operators must be setup with the same name. Using the old name.";
+		}
 		name = _name;
-		depth = _depth;
-		ID = name + "_" + type + "_" + ofToString(depth);
+		ID = name + "_" + type + "_" + getDepth();
 
 		setupParams();
 	};
 	string getID() { return ID; };
 	string getType() { return type; };
-	int getDepth() { return depth; }
+	string getDepth() {
+		string out = "";
+		for (int i = 0; i < depths.size(); i++) {
+			if (i != 0) out += "/";
+			out += ofToString(depths[i]);
+		}
+		return out;
+	}
 
 	virtual void setupParams();
 
@@ -44,8 +58,9 @@ protected:
 	string type = "none";
 	// Layer Name
 	string name = "";
-	// Depth of layer (first is 0, next is 1, ...)
-	int depth = 0;
+	// Depths of layer (first is 0, next is 1, ...)
+	// Wrappable layers (ike Age) can have multiple depths.
+	vector<int> depths;
 	// ID of this layer
 	string ID = "";
 
@@ -67,15 +82,26 @@ public:
 
 	void process(ofxFilterData& data);
 
-	virtual void clear() {};
+	void resetProcessCount() { processCount = 0; }
+	int getProcessCount() { return processCount; }
+
+	void clear();
 	
 protected:
 
 	// Apply this operator to data and get transformed data as output
 	virtual void _process(ofxFilterData& data);
 
+	// Clear any other user params
+	virtual void _clear() {};
+
 	// Parameters
 	ofxFilterOpSettings* settings;
+
+	// How many times has this been processed?
+	// This will be 0 the first time it is processed, 1 the second time, 
+	// and so on...
+	int processCount = 0;
 
 
 };

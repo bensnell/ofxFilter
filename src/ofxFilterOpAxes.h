@@ -2,7 +2,6 @@
 
 #include "ofMain.h"
 #include "ofxRemoteUIServer.h"
-#include "ofxCv.h"
 #include "ofxFilterUtils.h"
 #include "ofxFilterData.h"
 #include "ofxFilterOp.h"

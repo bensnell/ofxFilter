@@ -37,6 +37,8 @@ private:
 	string opList = "";
 
 	// These are the settings for all filters in this group
+	// The size of this will not necessarily equal the number of ops, 
+	// since some ops wrap around the op stack.
 	vector<ofxFilterOpSettings*> opSettings;
 
 	// These are all of the filters in a dict with key value of their name

@@ -19,6 +19,9 @@ void ofxFilterOp::process(ofxFilterData& data) {
 
 	// If it is enabled, then process data
 	_process(data);
+
+	// Increment the count
+	processCount++;
 }
 
 // --------------------------------------------------
@@ -33,7 +36,10 @@ void ofxFilterOp::_process(ofxFilterData& data) {
 }
 
 // --------------------------------------------------
-
+void ofxFilterOp::clear() {
+	processCount = 0;
+	_clear();
+}
 
 // --------------------------------------------------
 

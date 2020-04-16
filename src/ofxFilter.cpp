@@ -19,99 +19,156 @@ void ofxFilter::setup(vector<ofxFilterOpSettings*>& _settings) {
 		ofxFilterOp* op;
 		if (type == "none") {
 			op = new ofxFilterOp();
+			ops.insert(ops.begin() + i, op);
 		}
 		else if (type == "easing") {
 			op = new ofxFilterOpEasing();
+			ops.insert(ops.begin() + i, op);
 		}
 		else if (type == "kalman") {
 			op = new ofxFilterOpKalman();
+			ops.insert(ops.begin() + i, op);
 		}
 		else if (type == "add-rate") {
 			op = new ofxFilterOpAddRate();
+			ops.insert(ops.begin() + i, op);
 		}
 		else if (type == "continuity") {
 			op = new ofxFilterOpContinuity();
+			ops.insert(ops.begin() + i, op);
 		}
 		else if (type == "axes") {
 			op = new ofxFilterOpAxes();
+			ops.insert(ops.begin() + i, op);
+		}
+		else if (type == "age") {
+			op = new ofxFilterOpAge();
+			ops.insert(ops.begin(), op);
+			ops.push_back(op);
 		}
 		else {
 			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			continue;
 		}
 		op->setup(_settings[i]);
-		ops.push_back(op);
 	}
 }
 
 // --------------------------------------------------
 float ofxFilter::process(float in) {
+
+	frame.bValid = true;
+
 	validMeasures[0] |= true;
-	glm::mat4 m = glm::translate(glm::vec3(in, 0, 0));
-	_process(m);
+	frame.validMeasures = validMeasures;
+
+	frame.m = glm::translate(glm::vec3(in, 0, 0));
+
+	processFrame();
+
 	return getScalar();
 }
 
 // --------------------------------------------------
 glm::vec2 ofxFilter::process(glm::vec2 in) {
+
+	frame.bValid = true;
+
 	validMeasures[0] |= true;
-	glm::mat4 m = glm::translate(glm::vec3(in.x, in.y, 0));
-	_process(m);
+	frame.validMeasures = validMeasures;
+
+	frame.m = glm::translate(glm::vec3(in.x, in.y, 0));
+
+	processFrame();
+
 	return getPosition2D();
 }
 
 // --------------------------------------------------
 glm::vec3 ofxFilter::process(glm::vec3 in) {
+
+	frame.bValid = true;
+
 	validMeasures[0] |= true;
-	glm::mat4 m = glm::translate(in);
-	_process(m);
+	frame.validMeasures = validMeasures;
+
+	frame.m = glm::translate(in);
+
+	processFrame();
+
 	return getPosition();
 }
 
 // --------------------------------------------------
 glm::quat ofxFilter::process(glm::quat in) {
+
+	frame.bValid = true;
+
 	validMeasures[1] |= true;
-	glm::mat4x4 rotMat = glm::toMat4(in);
-	_process(rotMat);
+	frame.validMeasures = validMeasures;
+
+	frame.m = glm::toMat4(in);
+
+	processFrame();
+
 	return getOrientation();
 }
 
 // --------------------------------------------------
 glm::mat4 ofxFilter::process(glm::mat4 in) {
-	validMeasures = glm::vec3(true, true, true);
-	_process(in);
-	return getFrame();
-}
 
-// --------------------------------------------------
-glm::mat4 ofxFilter::_process(glm::mat4 in) {
-	// This processes valid data
-	frame.m = in;
 	frame.bValid = true;
+
+	validMeasures = glm::vec3(true, true, true);
 	frame.validMeasures = validMeasures;
-	bProcessed = true;
-	//lastValidInput = ofGetElapsedTimeMillis();
-	for (int i = 0; i < ops.size(); i++) {
-		ops[i]->process(frame); // TODO: lock so we aren't in the middle of changing data
-	}
-	//if (frame.bValid) lastValidOutput = ofGetElapsedTimeMillis();
-	nInvalidOutputs = frame.bValid ? 0 : (nInvalidOutputs + 1);
-	return frame.m;
+
+	frame.m = in;
+
+	processFrame();
+	
+	return getFrame();
 }
 
 // --------------------------------------------------
 glm::mat4 ofxFilter::process() {
 	// This processes invalid data. 
-	// Use the last data (frame) to pass through
+	
 	frame.bValid = false;
+	
 	frame.validMeasures = validMeasures;
+
+	// By default, use the last data (it doesn't matter what data is provided)
+
+	processFrame();
+
+	return getFrame();
+}
+
+// --------------------------------------------------
+void ofxFilter::processFrame() {
+
+	// Mark that this has been processed
 	bProcessed = true;
+
+	// If data is valid, mark this time
+	//if (frame.bValid) lastValidInput = ofGetElapsedTimeMillis();
+
+	// Reset the process counts of all operators
 	for (int i = 0; i < ops.size(); i++) {
-		ops[i]->process(frame);
+		ops[i]->resetProcessCount();
 	}
+
+	// Process the data through all operators
+	for (int i = 0; i < ops.size(); i++) {
+		// TODO: lock so we aren't in the middle of changing data?
+		ops[i]->process(frame); 
+	}
+
+	// If output data is valid, mark this time
 	//if (frame.bValid) lastValidOutput = ofGetElapsedTimeMillis();
+	
+	// Increment the count of the number of invalid outputs
 	nInvalidOutputs = frame.bValid ? 0 : (nInvalidOutputs + 1);
-	return frame.m; // should this return null if it's invalid?
 }
 
 // --------------------------------------------------

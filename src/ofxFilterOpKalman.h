@@ -60,4 +60,9 @@ protected:
 
 	int nEmptyPred = 0;
 
+	void _clear() {
+		bInitFilters = false;
+		nEmptyPred = 0;
+	}
+
 };

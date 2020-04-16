@@ -57,5 +57,11 @@ protected:
 	ofxFilterData lastValidData;
 
 	int nFramesSinceValidData = 1;
+	
+	void _clear() {
+		bLastDataValid = false;
+		lastValidData.clear();
+		nFramesSinceValidData = 1;
+	}
 
 };

@@ -104,5 +104,11 @@ protected:
     // the last data was valid
     bool bLastDataValid = false;
 
-
+	void _clear() {
+		bExporting = false;
+		bLinked = false;
+		bSetFirstPred = false;
+		nFramesSinceObs = 1;
+		bLastDataValid = false;
+	}
 };

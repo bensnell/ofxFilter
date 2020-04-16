@@ -45,4 +45,10 @@ protected:
 
     int nFramesSinceObs = 0;
 
+	void _clear() {
+		lastValidData.clear();
+		bFirstEase = true;
+		nFramesSinceObs = 0;
+	}
+
 };

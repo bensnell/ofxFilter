@@ -9,6 +9,7 @@
 #include "ofxFilterOpAddRate.h"
 #include "ofxFilterOpContinuity.h"
 #include "ofxFilterOpAxes.h"
+#include "ofxFilterOpAge.h"
 
 // A filter manipulates realtime data using a series of ops (operations)
 class ofxFilter {
@@ -16,7 +17,6 @@ public:
     
     ofxFilter();
     ~ofxFilter();
-	
 
 	// Setup this filter. Use the settings to determine which layers
 	// and how many should be used
@@ -68,7 +68,9 @@ private:
 	// What measures (translation, rotation, scale) are valid?
 	// And by consequence, what measures need to be calculated?
 	glm::bvec3 validMeasures = glm::bvec3(false, false, false);
-	glm::mat4 _process(glm::mat4 in);
+
+	// Process the frame, as it has been set by other process(x) calls
+	void processFrame();
 
 	// Has the last frame been processed with valid data?
 	bool bProcessed = false;
