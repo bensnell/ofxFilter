@@ -12,6 +12,7 @@ public:
 
 	ofxFilterOpAddRateSettings() {
 		type = "add-rate";
+		abbr = "RAT";
 	};
 	~ofxFilterOpAddRateSettings() {};
 

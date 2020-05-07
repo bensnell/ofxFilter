@@ -5,13 +5,13 @@ void ofxFilterOpKalmanSettings::setupParams() {
 
 	// Don't create a new group, just add on params
 
-	RUI_SHARE_PARAM_WCN(getID() + "- Smoothness", smoothness, -10, 10);
-	RUI_SHARE_PARAM_WCN(getID() + "- Rapidness", rapidness, -10, 10);
-	RUI_SHARE_PARAM_WCN(getID() + "- Use Accel", bUseAccel);
-	RUI_SHARE_PARAM_WCN(getID() + "- Use Jerk", bUseJerk);
-	RUI_SHARE_PARAM_WCN(getID() + "- Predict Empty", bPredictEmpty);
-	RUI_SHARE_PARAM_WCN(getID() + "- Max Empty Pred", nMaxEmptyPredictions, -1, 100);
-	RUI_SHARE_PARAM_WCN(getID() + "- Reset After Empty", bResetAfterEmpty);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Smoothness", smoothness, -10, 10);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Rapidness", rapidness, -10, 10);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Use Accel", bUseAccel);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Use Jerk", bUseJerk);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Predict Empty", bPredictEmpty);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Max Empty Pred", nMaxEmptyPredictions, -1, 100);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Reset After Empty", bResetAfterEmpty);
 
 }
 

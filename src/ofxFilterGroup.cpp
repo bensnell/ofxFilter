@@ -87,7 +87,7 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 
 	// Setup a parameter to enable each operator
 	for (int i = 0; i < opSettings.size(); i++) {
-		RUI_SHARE_PARAM_WCN(logPrefix + "_" + opSettings[i]->getType() + "_" + opSettings[i]->getDepth() + "- Enabled", opSettings[i]->bEnabled);
+		RUI_SHARE_PARAM_WCN(logPrefix + "_" + opSettings[i]->getAbbr() + "_" + opSettings[i]->getDepth() + "- Enabled", opSettings[i]->bEnabled);
 	}
 
 	// Setup operator-specific parameters

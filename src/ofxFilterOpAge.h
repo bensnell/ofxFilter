@@ -11,6 +11,7 @@ public:
 
 	ofxFilterOpAgeSettings() {
 		type = "age";
+		abbr = "AGE";
 	};
 	~ofxFilterOpAgeSettings() {};
 

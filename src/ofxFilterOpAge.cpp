@@ -4,7 +4,7 @@
 void ofxFilterOpAgeSettings::setupParams() {
 
 	// Don't create a new group, just add on params
-    RUI_SHARE_PARAM_WCN(getID() + "- Min Age", minAge, 0, 10000);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Min Age", minAge, 0, 10000);
 
 }
 

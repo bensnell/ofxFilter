@@ -13,6 +13,7 @@ public:
 
 	ofxFilterOpKalmanSettings() {
 		type = "kalman";
+		abbr = "KMN";
 	};
 	~ofxFilterOpKalmanSettings() {};
 

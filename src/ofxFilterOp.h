@@ -26,11 +26,14 @@ public:
 		}
 		name = _name;
 		ID = name + "_" + type + "_" + getDepth();
+		IDA = name + "_" + abbr + "_" + getDepth();
 
 		setupParams();
 	};
 	string getID() { return ID; };
+	string getIDA() { return IDA; }; // abbreviated ID
 	string getType() { return type; };
+	string getAbbr() { return abbr; }; // get abbreviation
 	string getDepth() {
 		string out = "";
 		for (int i = 0; i < depths.size(); i++) {
@@ -56,6 +59,8 @@ protected:
 
 	// Operator Type
 	string type = "none";
+	// Abbreviated operator type (3 letters)
+	string abbr = "NON";
 	// Layer Name
 	string name = "";
 	// Depths of layer (first is 0, next is 1, ...)
@@ -63,6 +68,8 @@ protected:
 	vector<int> depths;
 	// ID of this layer
 	string ID = "";
+	// Abbreviated ID
+	string IDA = "";
 
 	virtual long _maxLifespan() { return 1; }
 

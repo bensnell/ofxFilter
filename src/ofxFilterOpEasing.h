@@ -12,6 +12,7 @@ public:
 
 	ofxFilterOpEasingSettings() {
 		type = "easing";
+		abbr = "EAS";
 	};
 	~ofxFilterOpEasingSettings() {};
 

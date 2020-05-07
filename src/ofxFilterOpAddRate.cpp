@@ -5,15 +5,15 @@ void ofxFilterOpAddRateSettings::setupParams() {
 
 	// Don't create a new group, just add on params
 
-	RUI_SHARE_PARAM_WCN(getID() + "- Order", order, 1, 4);
-	RUI_SHARE_PARAM_WCN(getID() + "- Frames to Reset", nFramesToResetRate, 0, 120);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Fast Ease", forwardParams.fastEaseParam, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Slow Ease", forwardParams.slowEaseParam, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Default Ease", forwardParams.defaultEaseParam, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Ease Power", forwardParams.easeParamRatePower, 0, 10);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Max Trans Speed", forwardParams.maxSpeed[0], 0, 20);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Max Rot Speed", forwardParams.maxSpeed[1], 0, 360);
-    RUI_SHARE_PARAM_WCN(getID() + "- RateF Max Scale Speed", forwardParams.maxSpeed[2], 0, 20);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Order", order, 1, 4);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Frames to Reset", nFramesToResetRate, 0, 120);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Fast Ease", forwardParams.fastEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Slow Ease", forwardParams.slowEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Default Ease", forwardParams.defaultEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Ease Power", forwardParams.easeParamRatePower, 0, 10);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Max Trans Speed", forwardParams.maxSpeed[0], 0, 20);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Max Rot Speed", forwardParams.maxSpeed[1], 0, 360);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- RateF Max Scale Speed", forwardParams.maxSpeed[2], 0, 20);
     
     
     

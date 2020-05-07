@@ -4,14 +4,14 @@
 void ofxFilterOpAxesSettings::setupParams() {
 
 	// Don't create a new group, just add on params
-    RUI_SHARE_ENUM_PARAM_WCN(getID() + "- Src Handedness", srcHandedness, HandednessMode::RIGHT_HANDED, HandednessMode::LEFT_HANDED, getHandednessModes());
-    RUI_SHARE_ENUM_PARAM_WCN(getID() + "- Src Up Vector", srcUpVector, UpVectorMode::UP_X, UpVectorMode::UP_Z, getUpVectorModes());
+    RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- Src Handedness", srcHandedness, HandednessMode::RIGHT_HANDED, HandednessMode::LEFT_HANDED, getHandednessModes());
+    RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- Src Up Vector", srcUpVector, UpVectorMode::UP_X, UpVectorMode::UP_Z, getUpVectorModes());
 
-    RUI_SHARE_PARAM_WCN(getID() + "- Convert Handedness", bConvertHandedness);
-    RUI_SHARE_ENUM_PARAM_WCN(getID() + "- Dst Handedness", dstHandedness, HandednessMode::RIGHT_HANDED, HandednessMode::LEFT_HANDED, getHandednessModes());
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Convert Handedness", bConvertHandedness);
+    RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- Dst Handedness", dstHandedness, HandednessMode::RIGHT_HANDED, HandednessMode::LEFT_HANDED, getHandednessModes());
     
-    RUI_SHARE_PARAM_WCN(getID() + "- Convert Up Vector", bConvertUpVector);
-    RUI_SHARE_ENUM_PARAM_WCN(getID() + "- Dst Up Vector", dstUpVector, UpVectorMode::UP_X, UpVectorMode::UP_Z, getUpVectorModes());
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Convert Up Vector", bConvertUpVector);
+    RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- Dst Up Vector", dstUpVector, UpVectorMode::UP_X, UpVectorMode::UP_Z, getUpVectorModes());
 }
 
 // --------------------------------------------------

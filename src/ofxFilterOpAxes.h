@@ -11,6 +11,7 @@ public:
 
 	ofxFilterOpAxesSettings() {
 		type = "axes";
+		abbr = "AXS";
 	};
 	~ofxFilterOpAxesSettings() {};
 

@@ -5,8 +5,8 @@ void ofxFilterOpEasingSettings::setupParams() {
 
 	// Don't create a new group, just add on params
 
-	RUI_SHARE_PARAM_WCN(getID() + "- Easing Param", easingParam, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Frames To Reset", nEmptyFramesToReset, 0, 240);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Easing Param", easingParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Frames To Reset", nEmptyFramesToReset, 0, 240);
 
 }
 

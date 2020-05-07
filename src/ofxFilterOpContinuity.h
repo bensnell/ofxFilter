@@ -12,6 +12,7 @@ public:
 
 	ofxFilterOpContinuitySettings() {
 		type = "continuity";
+		abbr = "CNT";
 	};
 	~ofxFilterOpContinuitySettings() {};
 

@@ -3,49 +3,49 @@
 // --------------------------------------------------
 void ofxFilterOpContinuitySettings::setupParams() {
 
-	RUI_SHARE_PARAM_WCN(getID() + "- Max Pred Frames", nMaxPredFrames, 0, 14400);
-	RUI_SHARE_PARAM_WCN(getID() + "- Rate Order for Export", rateOrderToBeginExport, 0, 3);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Max Pred Frames", nMaxPredFrames, 0, 14400);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Rate Order for Export", rateOrderToBeginExport, 0, 3);
 	vector<string> reconModes = ofxFilterData::getReconciliationModes();
-	RUI_SHARE_ENUM_PARAM_WCN(getID() + "- Linked Recon Mode", existingLinkReconMode, ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL, ofxFilterData::ReconciliationMode::NUM_OFXFILTERDATA_RECONCILE_MODES-1, reconModes);
-	RUI_SHARE_PARAM_WCN(getID() + "- Frames to Unlink", nFramesUnlinkThresh, 0, 120);
+	RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- Linked Recon Mode", existingLinkReconMode, ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL, ofxFilterData::ReconciliationMode::NUM_OFXFILTERDATA_RECONCILE_MODES-1, reconModes);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Frames to Unlink", nFramesUnlinkThresh, 0, 120);
     
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Trans Thresh", simParams.thresh[0], 0, 10);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Trans Mix", simParams.mix[0], 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rot Thresh", simParams.thresh[1], 0, 45);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rot Mix", simParams.mix[1], 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Scale Thresh", simParams.thresh[2], 0, 10);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Scale Mix", simParams.mix[2], 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Num Rates", simParams.nRates, 0, 4);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Thresh Mult", simParams.rateThreshMult, 0, 100);
-	RUI_SHARE_PARAM_WCN(getID() + "- Sim Rate Weight", simParams.rateWeight, 0, 10);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Trans Thresh", simParams.thresh[0], 0, 10);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Trans Mix", simParams.mix[0], 0, 1);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Rot Thresh", simParams.thresh[1], 0, 45);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Rot Mix", simParams.mix[1], 0, 1);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Scale Thresh", simParams.thresh[2], 0, 10);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Scale Mix", simParams.mix[2], 0, 1);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Num Rates", simParams.nRates, 0, 4);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Rate Thresh Mult", simParams.rateThreshMult, 0, 100);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Sim Rate Weight", simParams.rateWeight, 0, 10);
     
     linkedFrictionParams.friction = 0.95;
     linkedFrictionParams.ratePower = -1;
-	RUI_SHARE_PARAM_WCN(getID() + "- Lnk Friction", linkedFrictionParams.friction, 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Lnk Friction Rate Power", linkedFrictionParams.ratePower, -1, 10);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Lnk Friction", linkedFrictionParams.friction, 0, 1);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Lnk Friction Rate Power", linkedFrictionParams.ratePower, -1, 10);
     
     unlinkedFrictionParams.friction = 0.95;
     unlinkedFrictionParams.ratePower = 2.0;
-    RUI_SHARE_PARAM_WCN(getID() + "- Ulnk Friction", unlinkedFrictionParams.friction, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Ulnk Friction Rate Power", unlinkedFrictionParams.ratePower, -1, 10);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Ulnk Friction", unlinkedFrictionParams.friction, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Ulnk Friction Rate Power", unlinkedFrictionParams.ratePower, -1, 10);
     
-	RUI_SHARE_PARAM_WCN(getID() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
-    RUI_SHARE_ENUM_PARAM_WCN(getID() + "- New Link Recon Mode", newLinkReconMode, ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL, ofxFilterData::ReconciliationMode::NUM_OFXFILTERDATA_RECONCILE_MODES-1, reconModes);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Lookahead Frames", nLookaheadFrames, 0, 30);
+    RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- New Link Recon Mode", newLinkReconMode, ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL, ofxFilterData::ReconciliationMode::NUM_OFXFILTERDATA_RECONCILE_MODES-1, reconModes);
     
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Epsilon Power", convParams.epsilonPower, 0, 12);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Epsilon Power", convParams.epsilonPower, 0, 12);
     
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Trans Speed", convParams.maxSpeed[0], 0, 20);
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Rot Speed", convParams.maxSpeed[1], 0, 360);
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Max Scale Speed", convParams.maxSpeed[2], 0, 20);
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Time", convParams.approachTime, 0, 20);
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Approach Buf", convParams.approachBuffer, 0, 1);
-	RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Step Power", convParams.accStepPower, 1, 10);
-    RUI_SHARE_PARAM_WCN(getID() + "- Conv Target Speed Ease", convParams.targetSpeedEaseParam, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Conv Acc Mag Ease", convParams.accMagEaseParam, 0, 1);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Max Trans Speed", convParams.maxSpeed[0], 0, 20);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Max Rot Speed", convParams.maxSpeed[1], 0, 360);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Max Scale Speed", convParams.maxSpeed[2], 0, 20);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Approach Time", convParams.approachTime, 0, 20);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Approach Buf", convParams.approachBuffer, 0, 1);
+	RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Acc Step Power", convParams.accStepPower, 1, 10);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Target Speed Ease", convParams.targetSpeedEaseParam, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Conv Acc Mag Ease", convParams.accMagEaseParam, 0, 1);
     
-    RUI_SHARE_PARAM_WCN(getID() + "- Red Opp Dir Mult", reduceParams.opposingDirMult, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Red Aln Dir Mult", reduceParams.alignedDirMult, 0, 1);
-    RUI_SHARE_PARAM_WCN(getID() + "- Red Power", reduceParams.power, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Red Opp Dir Mult", reduceParams.opposingDirMult, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Red Aln Dir Mult", reduceParams.alignedDirMult, 0, 1);
+    RUI_SHARE_PARAM_WCN(getIDA() + "- Red Power", reduceParams.power, 0, 1);
 
 }
 
