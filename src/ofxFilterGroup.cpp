@@ -73,7 +73,8 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 			bAge = true;
 		}
 		else {
-			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
+			if (type.empty()) ofLogNotice("ofxFilter") << "Operator type is empty.";
+			else ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			depth--;
 			continue;
 		}
