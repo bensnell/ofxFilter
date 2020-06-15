@@ -72,6 +72,10 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 			opSettings.insert(opSettings.begin(), settings);
 			bAge = true;
 		}
+		else if (type == "persist") {
+			settings = new ofxFilterOpPersistSettings();
+			opSettings.push_back(settings);
+		}
 		else {
 			if (type.empty()) ofLogNotice("ofxFilter") << "Operator type is empty.";
 			else ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";

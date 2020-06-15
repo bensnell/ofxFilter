@@ -46,6 +46,10 @@ void ofxFilter::setup(vector<ofxFilterOpSettings*>& _settings) {
 			ops.insert(ops.begin(), op);
 			ops.push_back(op);
 		}
+		else if (type == "persist") {
+			op = new ofxFilterOpPersist();
+			ops.insert(ops.begin() + i, op);
+		}
 		else {
 			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			continue;

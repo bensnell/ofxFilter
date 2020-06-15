@@ -28,7 +28,8 @@ A layer is called an `ofxFilterOp`. Available layers include (where the accompan
 - Add Rate (`add-rate`): This layer adds differentiable rates (of order `n`) to the `mat4`, in the form of a `mat4rate` object. Rates describe the change of a value from one frame to another. Rates are not calculated by default, since not all ops require them. When an op requires rates, place this layer before it.
 - Continuity (`continuity`): This layer is capable of making predictions to "fill in" missing data. Is is also capable of "merging" predicted data with known data, hence the name "continuity." It is designed to intelligently fill in gaps when new information is unavailable. It must follow the `add-rate` operator with `order=3`.
 - Axes (`axes`): This layer can adjust the coordinate system axes by changing the handedness (right or left) of a coordinate system and the up vector (X, Y, or Z) of that system.
-- Age (`age`): This layer only allows data of a certain age to pass through. It is a "wrappable" layer, which means it wraps the entire stack in an operator. Only one of these operators can be used per filter. 
+- Age (`age`): This layer only allows data of a certain age to pass through. It is a "wrappable" layer, which means it wraps the entire stack in an operator. Only one of these operators can be used per filter.
+- Persist (`persist`): This layer forces invalid data to be valid for a number of frames. It can be useful to force tracking across multiple consecutive frames when other operators would otherwise prevent this.
 
 A group of filters that share the same settings (types, locations and quantity of ops) can be contained with an `ofxFilterGroup` dictionary, where each filter is accessible via a key string.
 
@@ -256,6 +257,12 @@ In order to adjust a coordinate system's axes, the reference (source) handedness
 This operator wraps the entire operator stack. Only one can be used per filter. 
 
 `Min Age`: Data must be at least this age (in frames) in order to be exported.
+
+### ofxFilterOpPersist
+
+This operator forces validity of invalid data for a number of frames.
+
+`Num Frames`: Number of frames to persist validity.
 
 
 

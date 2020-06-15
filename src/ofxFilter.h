@@ -10,6 +10,7 @@
 #include "ofxFilterOpContinuity.h"
 #include "ofxFilterOpAxes.h"
 #include "ofxFilterOpAge.h"
+#include "ofxFilterOpPersist.h"
 
 // A filter manipulates realtime data using a series of ops (operations)
 class ofxFilter {
