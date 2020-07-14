@@ -14,6 +14,18 @@ void ofxFilterOp::setup(ofxFilterOpSettings* _settings) {
 
 // --------------------------------------------------
 void ofxFilterOp::process(ofxFilterData& data) {
+	// If this operator is not enabled, then do not process
+	if (!settings->bEnabled) return;
+
+	// If it is enabled, then process data
+	_process(data);
+
+	// Increment the count
+	processCount++;
+}
+
+// --------------------------------------------------
+void ofxFilterOp::_process(ofxFilterData& data) {
 	
 	// Empty processes should pass through data unless an operator is explicitly
 	// designed to process empty data
@@ -24,7 +36,10 @@ void ofxFilterOp::process(ofxFilterData& data) {
 }
 
 // --------------------------------------------------
-
+void ofxFilterOp::clear() {
+	processCount = 0;
+	_clear();
+}
 
 // --------------------------------------------------
 

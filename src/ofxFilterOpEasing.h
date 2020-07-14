@@ -12,6 +12,7 @@ public:
 
 	ofxFilterOpEasingSettings() {
 		type = "easing";
+		abbr = "EAS";
 	};
 	~ofxFilterOpEasingSettings() {};
 
@@ -35,15 +36,20 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
 
 	ofxFilterData lastValidData;
 	bool bFirstEase = true;
 
     int nFramesSinceObs = 0;
+
+	void _clear() {
+		lastValidData.clear();
+		bFirstEase = true;
+		nFramesSinceObs = 0;
+	}
 
 };

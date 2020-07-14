@@ -13,6 +13,7 @@ public:
 
 	ofxFilterOpKalmanSettings() {
 		type = "kalman";
+		abbr = "KMN";
 	};
 	~ofxFilterOpKalmanSettings() {};
 
@@ -45,11 +46,10 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
  
 	ofxCv::KalmanPosition kt;	// kalman translation
 	ofxCv::KalmanEuler kr;		// kalman rotation
@@ -57,7 +57,13 @@ protected:
 
 	// Initialize the filters (resets their states)
 	void initFilters();
+	bool bInitFilters = false; // Have filters been initialized?
 
 	int nEmptyPred = 0;
+
+	void _clear() {
+		bInitFilters = false;
+		nEmptyPred = 0;
+	}
 
 };

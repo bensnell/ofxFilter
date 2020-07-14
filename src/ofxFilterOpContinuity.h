@@ -12,6 +12,7 @@ public:
 
 	ofxFilterOpContinuitySettings() {
 		type = "continuity";
+		abbr = "CNT";
 	};
 	~ofxFilterOpContinuitySettings() {};
 
@@ -63,6 +64,10 @@ public:
     // Rate Reduction Params
     mat4rate::RateReduceParams reduceParams;
 
+protected:
+
+	long _maxLifespan() { return nMaxPredFrames + 1; }
+
 };
 
 class ofxFilterOpContinuity : public ofxFilterOp {
@@ -71,13 +76,10 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
-
-
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
 
 	ofxFilterData predData;	// predicted data
 	ofxFilterData tmpData;	// temporary data
@@ -103,5 +105,11 @@ protected:
     // the last data was valid
     bool bLastDataValid = false;
 
-
+	void _clear() {
+		bExporting = false;
+		bLinked = false;
+		bSetFirstPred = false;
+		nFramesSinceObs = 1;
+		bLastDataValid = false;
+	}
 };

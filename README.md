@@ -6,7 +6,9 @@ This addon is a realtime filter capable of smoothing and filtering streams of da
 
 The base form of the data operated on is a transformation matrix (`glm::mat4`). The matrix describes all properties of a reference frame, including position, orientation and scale. However, not all of these attributes need be used. A filter can process a scalar, 2D point, 3D point, etc. using the appropriate `process()` function (see more below).
 
-This filter is also capable of handling invalid input (when inputs are missing or obscured). See below for a use case.
+This filter is also capable of handling invalid input (when inputs are missing or obscured). In the example below, ofxFilter is used to "fill in" gaps of missing data. The "filling in" is in green; blue represents known data or data produced while observations are available.
+
+![example-demo.gif](example-demo.gif)
 
 ## Requirements
 
@@ -25,6 +27,9 @@ A layer is called an `ofxFilterOp`. Available layers include (where the accompan
 - Kalman (`kalman`): This layer applies a kalman filter to the data. 
 - Add Rate (`add-rate`): This layer adds differentiable rates (of order `n`) to the `mat4`, in the form of a `mat4rate` object. Rates describe the change of a value from one frame to another. Rates are not calculated by default, since not all ops require them. When an op requires rates, place this layer before it.
 - Continuity (`continuity`): This layer is capable of making predictions to "fill in" missing data. Is is also capable of "merging" predicted data with known data, hence the name "continuity." It is designed to intelligently fill in gaps when new information is unavailable. It must follow the `add-rate` operator with `order=3`.
+- Axes (`axes`): This layer can adjust the coordinate system axes by changing the handedness (right or left) of a coordinate system and the up vector (X, Y, or Z) of that system.
+- Age (`age`): This layer only allows data of a certain age to pass through. It is a "wrappable" layer, which means it wraps the entire stack in an operator. Only one of these operators can be used per filter.
+- Persist (`persist`): This layer forces invalid data to be valid for a number of frames. It can be useful to force tracking across multiple consecutive frames when other operators would otherwise prevent this.
 
 A group of filters that share the same settings (types, locations and quantity of ops) can be contained with an `ofxFilterGroup` dictionary, where each filter is accessible via a key string.
 
@@ -87,9 +92,7 @@ void draw() {
 }
 ```
 
-For a complete demo, see the example provided in the folder `example`.
-
-
+For a complete demo, see the example provided in the folder `example`. 
 
 ## Parameters
 
@@ -233,11 +236,39 @@ When data transitions from being observed to being predicted, high order rates (
 
 `Power` : This exponent sensitizes the range between opposing and aligned rates. A value < 1 makes orthogonal rates closer to `Aln Dir Mult`, while a value > 1 makes orthogonal rates closer to `Opp Dir Mult`. Range: (0, +inf).
 
+### ofxFilterOpAxes
+
+In order to adjust a coordinate system's axes, the reference (source) handedness and up vector must be know. Supply those values in the first two variables:
+
+`Src Handedness`: Source handedness of the coordinate system (for reference).
+
+`Src Up Vector`: Source up vector of the coordinate system (for reference).
+
+`Convert Handedness`: Boolean indicating whether handedness should be converted to the destination handedness.
+
+`Dst Handedness`: Desired handedness of the system.
+
+`Convert Up Vector`: Boolean indicating whether up vector should be converted to the destination up vector.
+
+`Dst Up Vector`: Desired up vector of the system.
+
+### ofxFilterOpAge
+
+This operator wraps the entire operator stack. Only one can be used per filter. 
+
+`Min Age`: Data must be at least this age (in frames) in order to be exported.
+
+### ofxFilterOpPersist
+
+This operator forces validity of invalid data for a number of frames.
+
+`Num Frames`: Number of frames to persist validity.
+
 
 
 ## Troubleshooting
 
-### Orientations produce strange arifacts
+### Orientations produce strange artifacts
 
 This addon is untested on orientation/rotation data. Contributions and bug-fixes are welcome.
 
@@ -245,9 +276,9 @@ This addon is untested on orientation/rotation data. Contributions and bug-fixes
 
 TODO
 
+### It doesn't run as fast as expected
 
+The `kalman` operator is the most computationally intensive. On a computer with the following specs, the app was limited to processing 150 simultaneous 3D points at 240 fps:
 
-
-
-
+- Processor	Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz, 3600 Mhz, 8 Core(s), 8 Logical Processor(s)
 

@@ -12,6 +12,7 @@ public:
 
 	ofxFilterOpAddRateSettings() {
 		type = "add-rate";
+		abbr = "RAT";
 	};
 	~ofxFilterOpAddRateSettings() {};
 
@@ -36,6 +37,9 @@ public:
     // apply an each to the rates.
     mat4rate::RateForwardParams forwardParams;
 
+protected:
+
+	long _maxLifespan() { return order + 1; }
 };
 
 class ofxFilterOpAddRate : public ofxFilterOp {
@@ -44,16 +48,21 @@ public:
 	// Setup this operator
 	void setup(ofxFilterOpSettings* _settings);
 
-	// Apply this operator to data and get transformed data as output
-	void process(ofxFilterData& data);
-
-
 protected:
+
+	// Apply this operator to data and get transformed data as output
+	void _process(ofxFilterData& data);
 
     bool bLastDataValid = false;
     
 	ofxFilterData lastValidData;
 
 	int nFramesSinceValidData = 1;
+	
+	void _clear() {
+		bLastDataValid = false;
+		lastValidData.clear();
+		nFramesSinceValidData = 1;
+	}
 
 };

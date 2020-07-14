@@ -29,14 +29,18 @@ public:
 	}
 
 	void init(int size) {
-		b.clear();
+		clear();
 		b.resize(size, false);
-		t.clear();
 		t.resize(size, { 0,0,0 });
-		r.clear();
 		r.resize(size, { 0,0,0 });
-		s.clear();
 		s.resize(size, { 0,0,0 });
+	}
+
+	void clear() {
+		b.clear();
+		t.clear();
+		r.clear();
+		s.clear();
 	}
 
 	
@@ -141,6 +145,9 @@ public:
 	glm::vec3 translation();
 	glm::quat rotation();
 	glm::vec3 scale();
+	// Which of these measures is valid? (being operated upon)
+	// This must be set externally.
+	glm::bvec3 validMeasures = glm::bvec3(false, false, false);
 
 	// Lerp to another data object
 	void lerp(ofxFilterData& to, float amt);
@@ -203,6 +210,11 @@ public:
     
 	// Set the internal matrix from the rate
 	bool setFrameFromRate();
+
+	// -----------------------------
+	
+	// Clear this data
+	void clear();
 
 
 protected:

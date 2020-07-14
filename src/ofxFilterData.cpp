@@ -418,6 +418,13 @@ bool ofxFilterData::similar(ofxFilterData& a, SimilarityParams& p) {
 }
 
 // --------------------------------------------------
+void ofxFilterData::clear() {
+
+    bValid = true;
+    m = glm::mat4();
+    validMeasures = glm::bvec3(false, false, false);
+    r.clear();
+}
 
 // --------------------------------------------------
 

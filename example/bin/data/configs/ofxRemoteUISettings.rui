@@ -6,9 +6,14 @@
 		<P name="FUnits- FPS" type="float">240</P>
 		<!-- # ofxFilterGroup - mouse ################################################################################# -->
 		<P name="ofxFilterGroup - mouse" type="group" />
-		<P name="FG_mouse- opList" type="string">easing,add-rate,continuity</P>
-		<P name="FG_mouse_easing_0- Easing Param" type="float">0.9</P>
-		<P name="FG_mouse_easing_0- Frames To Reset" type="int">1</P>
+		<P name="FG_mouse- opList" type="string">kalman,add-rate,continuity</P>
+		<P name="FG_mouse_kalman_0- Smoothness" type="float">7</P>
+		<P name="FG_mouse_kalman_0- Rapidness" type="float">0</P>
+		<P name="FG_mouse_kalman_0- Use Accel" type="bool">1</P>
+		<P name="FG_mouse_kalman_0- Use Jerk" type="bool">0</P>
+		<P name="FG_mouse_kalman_0- Predict Empty" type="bool">0</P>
+		<P name="FG_mouse_kalman_0- Max Empty Pred" type="int">10</P>
+		<P name="FG_mouse_kalman_0- Reset After Empty" type="bool">1</P>
 		<P name="FG_mouse_add-rate_1- Order" type="int">3</P>
 		<P name="FG_mouse_add-rate_1- Frames to Reset" type="int">3</P>
 		<P name="FG_mouse_add-rate_1- RateF Fast Ease" type="float">0.1</P>
@@ -52,13 +57,8 @@
 		<!--                                                                                                  -->
 		<!-- ###################################### DISABLED PARAMS ######################################### -->
 		<!--                                                                                                  -->
-		<P name="FG_mouse_kalman_0- Smoothness" type="float" disabled="1">7</P>
-		<P name="FG_mouse_kalman_0- Rapidness" type="float" disabled="1">0</P>
-		<P name="FG_mouse_kalman_0- Use Accel" type="bool" disabled="1">1</P>
-		<P name="FG_mouse_kalman_0- Use Jerk" type="bool" disabled="1">0</P>
-		<P name="FG_mouse_kalman_0- Predict Empty" type="bool" disabled="1">0</P>
-		<P name="FG_mouse_kalman_0- Max Empty Pred" type="int" disabled="1">10</P>
-		<P name="FG_mouse_kalman_0- Reset After Empty" type="bool" disabled="1">1</P>
+		<P name="FG_mouse_easing_0- Easing Param" type="float" disabled="1">0.9</P>
+		<P name="FG_mouse_easing_0- Frames To Reset" type="int" disabled="1">1</P>
 		<P name="FUnits - FPS" type="float" disabled="1">240</P>
 		<P name="FG_mouse_add-rate_1- RateF FPS" type="float" disabled="1">60</P>
 		<P name="FG_mouse_continuity_2- Conv FPS" type="float" disabled="1">60</P>
