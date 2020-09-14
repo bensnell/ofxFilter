@@ -25,10 +25,6 @@ public:
     // Convert an easing param from one frame rate to another.
     float convertEaseParam(float param, float refFPS);
     
-    
-    
-    
-    
 private:
     
     static ofxFilterUnits* _instance;

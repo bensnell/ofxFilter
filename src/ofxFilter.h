@@ -55,7 +55,8 @@ public:
 	// How many frames of invalid input have passed?
 	uint64_t& getNumInvalidOutputs() { return nInvalidOutputs; }
 
-	// Delete all operators. Reset.
+	// Reset all internal states.
+	// (Does not delete the operators).
 	void clear();
 
 private:

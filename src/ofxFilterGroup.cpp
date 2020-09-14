@@ -179,7 +179,12 @@ void ofxFilterGroup::removeUnused() {
 }
 
 // --------------------------------------------------
+void ofxFilterGroup::reset() {
 
+	for (auto& it : filters) {
+		it.second->clear();
+	}
+}
 
 // --------------------------------------------------
 

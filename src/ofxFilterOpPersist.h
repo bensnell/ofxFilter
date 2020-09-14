@@ -25,7 +25,6 @@ public:
 	//		n for n frames
 	int	nFrames = 0;
 
-
 protected:
 
 	long _maxLifespan() { return max(nFrames, 0) + 2; }
@@ -49,5 +48,4 @@ protected:
 	void _clear() {
 		nInvalidFrames = 0;
 	}
-
 };

@@ -106,6 +106,10 @@ protected:
     bool bLastDataValid = false;
 
 	void _clear() {
+		predData.clear();
+		tmpData.clear();
+		convData.clear();
+		outData.clear();
 		bExporting = false;
 		bLinked = false;
 		bSetFirstPred = false;
