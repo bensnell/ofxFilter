@@ -42,8 +42,9 @@ public:
 	bool bConvertUpVector = true;
 	UpVectorMode dstUpVector = UP_Y;
 
-
-
+	// Number of (90 degree) rotations around the up vector.
+	// (# clockwise rotations)
+	int nUpVectorRotations = 0;
 };
 
 class ofxFilterOpAxes : public ofxFilterOp {
