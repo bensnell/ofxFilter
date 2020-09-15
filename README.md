@@ -252,6 +252,8 @@ In order to adjust a coordinate system's axes, the reference (source) handedness
 
 `Dst Up Vector`: Desired up vector of the system.
 
+`Num Up Vec Rotations`: Number of 90º clockwise rotations around the up vector.
+
 ### ofxFilterOpAge
 
 This operator wraps the entire operator stack. Only one can be used per filter. 
