@@ -61,6 +61,7 @@ void ofxFilterOpAxes::_process(ofxFilterData& data) {
     // Add rotations around the up vector
     if (s->nUpVectorRotations != 0) {
         int upv = int(s->bConvertUpVector ? s->dstUpVector : s->srcUpVector);
+        int h = int(s->bConvertHandedness ? s->dstHandedness : s->srcHandedness);
         glm::mat4 _T = glm::mat4(
             int(upv == 0),  -int(upv == 2), int(upv == 1),  0,
             int(upv == 2),  int(upv == 1),  -int(upv == 0), 0,

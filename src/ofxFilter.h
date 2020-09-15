@@ -11,6 +11,7 @@
 #include "ofxFilterOpAxes.h"
 #include "ofxFilterOpAge.h"
 #include "ofxFilterOpPersist.h"
+#include "ofxFilterOpTransform.h"
 
 // A filter manipulates realtime data using a series of ops (operations)
 class ofxFilter {
