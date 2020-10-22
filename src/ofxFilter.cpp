@@ -216,10 +216,8 @@ void ofxFilter::clear() {
 	for (int i = 0; i < ops.size(); i++) {
 		if (ops[i] != NULL) {
 			ops[i]->clear();
-			delete ops[i];
 		}
 	}
-	ops.clear();
 	frame.clear();
 	validMeasures = glm::bvec3(false, false, false);
 	bProcessed = false;
