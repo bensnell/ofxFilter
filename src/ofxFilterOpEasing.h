@@ -25,9 +25,6 @@ public:
     // 1    after a single frame
     // n    after n frames
     int nEmptyFramesToReset = 1;
-
-    
-
 };
 
 class ofxFilterOpEasing : public ofxFilterOp {

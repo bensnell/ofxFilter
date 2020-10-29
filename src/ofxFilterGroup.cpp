@@ -76,8 +76,13 @@ void ofxFilterGroup::setup(string _name, string _opList) {
 			settings = new ofxFilterOpPersistSettings();
 			opSettings.push_back(settings);
 		}
+		else if (type == "transform") {
+			settings = new ofxFilterOpTransformSettings();
+			opSettings.push_back(settings);
+		}
+		// ^^^ Add new operators here ^^^
 		else {
-			if (type.empty()) ofLogNotice("ofxFilter") << "Operator type is empty.";
+			if (type.empty()) ofLogVerbose("ofxFilter") << "Operator type is empty.";
 			else ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			depth--;
 			continue;
@@ -179,7 +184,12 @@ void ofxFilterGroup::removeUnused() {
 }
 
 // --------------------------------------------------
+void ofxFilterGroup::reset() {
 
+	for (auto& it : filters) {
+		it.second->clear();
+	}
+}
 
 // --------------------------------------------------
 

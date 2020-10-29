@@ -50,6 +50,11 @@ void ofxFilter::setup(vector<ofxFilterOpSettings*>& _settings) {
 			op = new ofxFilterOpPersist();
 			ops.insert(ops.begin() + i, op);
 		}
+		else if (type == "transform") {
+			op = new ofxFilterOpTransform();
+			ops.insert(ops.begin() + i, op);
+		}
+		// ^^^ Add new operators here ^^^
 		else {
 			ofLogError("ofxFilter") << "Operator type \"" << type << "\" is not valid.";
 			continue;
@@ -211,10 +216,8 @@ void ofxFilter::clear() {
 	for (int i = 0; i < ops.size(); i++) {
 		if (ops[i] != NULL) {
 			ops[i]->clear();
-			delete ops[i];
 		}
 	}
-	ops.clear();
 	frame.clear();
 	validMeasures = glm::bvec3(false, false, false);
 	bProcessed = false;

@@ -29,6 +29,9 @@ public:
 	// valid data recently.
 	void removeUnused();
 
+	// Reset all filters (resets internal states).
+	void reset();
+
 
 private:
 

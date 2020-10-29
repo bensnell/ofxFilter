@@ -30,12 +30,20 @@ A layer is called an `ofxFilterOp`. Available layers include (where the accompan
 - Axes (`axes`): This layer can adjust the coordinate system axes by changing the handedness (right or left) of a coordinate system and the up vector (X, Y, or Z) of that system.
 - Age (`age`): This layer only allows data of a certain age to pass through. It is a "wrappable" layer, which means it wraps the entire stack in an operator. Only one of these operators can be used per filter.
 - Persist (`persist`): This layer forces invalid data to be valid for a number of frames. It can be useful to force tracking across multiple consecutive frames when other operators would otherwise prevent this.
+- Transform (`transform`): This layer will apply a transformation to the data. Available transformations include scale, rotate, and translation (applied in this order). Rotation is supplied via euler angles applied in Yaw-Pitch-Roll (YXZ) order.
 
 A group of filters that share the same settings (types, locations and quantity of ops) can be contained with an `ofxFilterGroup` dictionary, where each filter is accessible via a key string.
 
 A filter's operators are defined by a string containing each op key in order, separated by a comma. For example, `"kalman,add-rate,continuity"` describes the filter containing a Kalman operator, followed by an Add Rate operator, followed by a Continuity operator.
 
 ## Usage
+
+Make sure to include the following Preprocessor Definitions (macros) in your project:
+
+- `GLM_EXT_INCLUDED`
+- `GLM_ENABLE_EXPERIMENTAL`
+
+Then, usage follows this form:
 
 ofApp.h
 
@@ -252,6 +260,8 @@ In order to adjust a coordinate system's axes, the reference (source) handedness
 
 `Dst Up Vector`: Desired up vector of the system.
 
+`Num Up Vec Rotations`: Number of 90º clockwise rotations around the up vector.
+
 ### ofxFilterOpAge
 
 This operator wraps the entire operator stack. Only one can be used per filter. 
@@ -264,7 +274,27 @@ This operator forces validity of invalid data for a number of frames.
 
 `Num Frames`: Number of frames to persist validity.
 
+### ofxFilterOpTransform
 
+This operator applies a linear transformation matrix (from components scale, rotate and translate) to the data.
+
+`Translate X`: X translation.
+
+`Translate Y`: Y translation.
+
+`Translate Z`: Z translation.
+
+`Rotate X Pitch`: Euler angle (degrees) of pitch, or rotation around X.
+
+`Rotate Y Yaw`: Euler angle (degrees) of yaw, or rotation around Y.
+
+`Rotate Z Roll`: Euler angle (degrees) of roll, or rotation around Z.
+
+`Scale X`: X scale.
+
+`Scale Y`: Y scale.
+
+`Scale Z`: Z scale.
 
 ## Troubleshooting
 
