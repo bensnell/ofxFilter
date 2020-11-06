@@ -14,7 +14,7 @@ void ofApp::setup(){
 	RUI_LOAD_FROM_XML();
 
 	// Setup the filter group
-    filters.setup("mouse", "easing");
+    filters.setup("mouse", "kalman,rate,continuity");
 //    filters.getFilter("myMouse");
 }
 

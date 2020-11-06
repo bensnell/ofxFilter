@@ -312,3 +312,6 @@ The `kalman` operator is the most computationally intensive. On a computer with 
 
 - Processor	Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz, 3600 Mhz, 8 Core(s), 8 Logical Processor(s)
 
+### No member named `glm::eulerAngleYXZ`
+
+Make sure to include the appropriate preprocessor macros [above](#usage).
