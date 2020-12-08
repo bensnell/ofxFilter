@@ -26,10 +26,23 @@ public:
 	// (This value is in frames)
 	int minAge = 4;
 
+	// Should data be consecutive? 
+	// Or, in other words, is the age reset with any new invalid data?
+	// By default, this is true. When true, age is incremented for consecutive
+	// valid data and reset for invalid data.
+	// If false, then age is incremented for any valid data (it does not have to
+	// be consecutive), and age is never reset.
+	bool consecutive = true;
+
+	// Can other operators extend the validity of this operator?
+	// If true, then if other ops which make the data valid (after
+	// it has already been valid), this operator will allow this
+	// data to passthrough as valid.
+	bool otherOpsExtendValidity = true;
 
 protected:
 
-	long _maxLifespan() { return max(minAge, 0) + 2; }
+	long _maxLifespan() { return max(minAge, 0); }
 
 };
 
@@ -43,14 +56,18 @@ protected:
 
 	// Apply this operator to data and get transformed data as output
 	void _process(ofxFilterData& data);
-	
-	bool bThereWasValidData = false;
 
+	// Was the data valid last frame after each process?
+	bool bLastProcess0Valid = false;
+	bool bLastProcess1Valid = false;
+	
 	// What is the age (in frames) of this data?
 	uint64_t age = 0;
 
 	void _clear() {
 		age = 0;
+		bLastProcess0Valid = false;
+		bLastProcess1Valid = false;
 	}
 
 };
