@@ -156,6 +156,7 @@ long ofxFilterGroup::maxLifespan() {
 	long lifespan = 1;
 	long out = 1;
 	for (int i = 0; i < opSettings.size(); i++) {
+		if (!opSettings[i]->bEnabled) continue;
 		lifespan = opSettings[i]->maxLifespan();
 		if (lifespan < 0) return -1;
 		out = max(out, lifespan);
