@@ -24,7 +24,7 @@ public:
 	// will data allowed to be validated.
 	// (Note: The age counter does not look for consecutive validations.)
 	// (This value is in frames)
-	int minAge = 4;
+	int minAge = 5;
 
 	// Should data be consecutive? 
 	// Or, in other words, is the age reset with any new invalid data?

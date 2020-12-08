@@ -57,6 +57,4 @@ protected:
 
 	// Apply this operator to data and get transformed data as output
 	void _process(ofxFilterData& data);
-
-
 };

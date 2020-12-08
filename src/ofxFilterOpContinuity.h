@@ -66,7 +66,7 @@ public:
 
 protected:
 
-	long _maxLifespan() { return nMaxPredFrames + 1; }
+	long _maxLifespan() { return nMaxPredFrames; }
 
 };
 
