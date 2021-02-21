@@ -21,13 +21,13 @@ public:
 	// For how many invalid frames should this done?
 	// Possible values:
 	//		-1 for an infinite number of frames
-	//		0 will disable this operatore
+	//		0 will disable this operator
 	//		n for n frames
-	int	nFrames = 0;
+	int	nFrames = 10;
 
 protected:
 
-	long _maxLifespan() { return max(nFrames, 0) + 2; }
+	long _maxLifespan() { return max(nFrames, 0); }
 
 };
 

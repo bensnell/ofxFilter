@@ -46,10 +46,13 @@ public:
 	virtual void setupParams();
 
 	// What is the maximum lifespan of this operator (in # frames)?
-	// By default, it is 1 frame without valid data.
+	// This should only be changed if an operator is capable of
+	// making invalid data valid (e.g. "kalman", "continuity", "persist") or if an operator
+	// can keep data invalid for a number of frames before becoming valid (e.g. "age").
+	// By default, it is 0 frames without valid data.
 	// -1 will achieve an "infinite" lifespan effect.
 	long maxLifespan() { 
-		return bEnabled ? _maxLifespan() : 1;
+		return bEnabled ? _maxLifespan() : 0;
 	}
 
 	// Is this operator enabled?

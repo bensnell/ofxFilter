@@ -32,12 +32,14 @@ public:
 	bool bPredictEmpty = false;
 	// How many empty predictions should be made?
 	// After this many predictions, the algorithm stops predicting empty data.
-	// -1 indicates that prections happen indefinitely
+	// -1 indicates that predictions happen indefinitely
 	int nMaxEmptyPredictions = 1;
 	// Reset the filters after a stretch of absent readings
 	bool bResetAfterEmpty = true;
 
+protected:
 
+	long _maxLifespan() { return bPredictEmpty ? nMaxEmptyPredictions : 0; }
 };
 
 class ofxFilterOpKalman : public ofxFilterOp {

@@ -122,8 +122,6 @@ public:
         float power = 1.0;         // sensitizes the multiplier for the right orthogonal multiplier
     };
     void reduceRates(RateReduceParams& p);
-    
-
 };
 
 class ofxFilterData {

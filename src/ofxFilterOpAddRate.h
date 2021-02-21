@@ -36,10 +36,6 @@ public:
     // creates motion artifacts in predictions. To reduce, this,
     // apply an each to the rates.
     mat4rate::RateForwardParams forwardParams;
-
-protected:
-
-	long _maxLifespan() { return order + 1; }
 };
 
 class ofxFilterOpAddRate : public ofxFilterOp {

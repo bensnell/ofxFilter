@@ -153,8 +153,8 @@ void ofxFilterGroup::processRemaining() {
 long ofxFilterGroup::maxLifespan() {
 	// Calculate and return the max lifespan.
 	// -1 (infinite) lifespans will be passed through.
-	long lifespan = 1;
-	long out = 1;
+	long lifespan;
+	long out = 0;
 	for (int i = 0; i < opSettings.size(); i++) {
 		lifespan = opSettings[i]->maxLifespan();
 		if (lifespan < 0) return -1;
