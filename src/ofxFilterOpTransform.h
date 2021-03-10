@@ -16,6 +16,8 @@ public:
 		translation = glm::vec3(0, 0, 0);
 		rotation = glm::vec3(0, 0, 0);
 		scale = glm::vec3(1, 1, 1);
+
+		transformOrder = SRT;
 	};
 	~ofxFilterOpTransformSettings() {};
 
@@ -24,6 +26,22 @@ public:
 	glm::vec3 translation;
 	glm::vec3 rotation; // euler
 	glm::vec3 scale;
+
+	enum TRANSFORM_ORDER
+	{
+		SRT = 0,
+		STR,
+		RST,
+		RTS,
+		TSR,
+		TRS
+	};
+	vector<string> getTransformOrders()
+	{
+		return { "SRT", "STR", "RST", "RTS", "TSR", "TRS" };
+	}
+	TRANSFORM_ORDER transformOrder;
+	
 };
 
 class ofxFilterOpTransform : public ofxFilterOp {

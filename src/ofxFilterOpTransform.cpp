@@ -4,6 +4,9 @@
 void ofxFilterOpTransformSettings::setupParams() {
 
 	// Don't create a new group, just add on params
+    auto transformOrders = getTransformOrders();
+    RUI_SHARE_ENUM_PARAM_WCN(getIDA() + "- Transform Order", transformOrder, SRT, TRS, transformOrders);
+	
     RUI_SHARE_PARAM_WCN(getIDA() + "- Translate X", translation.x, -1000000, 1000000);
     RUI_SHARE_PARAM_WCN(getIDA() + "- Translate Y", translation.y, -1000000, 1000000);
     RUI_SHARE_PARAM_WCN(getIDA() + "- Translate Z", translation.z, -1000000, 1000000);
@@ -42,7 +45,28 @@ void ofxFilterOpTransform::_process(ofxFilterData& data) {
     auto _s = glm::scale(s->scale);
 
     // Apply them in SRT order
-    data.m = _t * (_r * (_s * data.m));
+	switch (s->transformOrder)
+	{
+    case ofxFilterOpTransformSettings::STR:
+        data.m = _r * (_t * (_s * data.m));
+        break;
+    case ofxFilterOpTransformSettings::RST:
+        data.m = _t * (_s * (_r * data.m));
+        break;
+    case ofxFilterOpTransformSettings::RTS:
+        data.m = _s * (_t * (_r * data.m));
+        break;
+    case ofxFilterOpTransformSettings::TSR:
+        data.m = _r * (_s * (_t * data.m));
+        break;
+    case ofxFilterOpTransformSettings::TRS:
+        data.m = _s * (_r * (_t * data.m));
+        break;
+    case ofxFilterOpTransformSettings::SRT:
+    default:
+        data.m = _t * (_r * (_s * data.m));
+        break;
+	}
 }
 
 // --------------------------------------------------

@@ -265,17 +265,18 @@ This operator forces validity of invalid data for a number of frames.
 
 This operator applies a linear transformation matrix (from components scale, rotate and translate) to the data.
 
-| Parameter        | Type  | Range        | Default | Description                                           |
-| ---------------- | ----- | ------------ | ------- | ----------------------------------------------------- |
-| `Translate X`    | float | (-inf, +inf) | 0.0     | X translation.                                        |
-| `Translate Y`    | float | (-inf, +inf) | 0.0     | Y translation.                                        |
-| `Translate Z`    | float | (-inf, +inf) | 0.0     | Z translation.                                        |
-| `Rotate X Pitch` | float | (-inf, +inf) | 0.0     | Euler angle (degrees) of pitch, or rotation around X. |
-| `Rotate Y Yaw`   | float | (-inf, +inf) | 0.0     | Euler angle (degrees) of yaw, or rotation around Y.   |
-| `Rotate Z Roll`  | float | (-inf, +inf) | 0.0     | Euler angle (degrees) of roll, or rotation around Z.  |
-| `Scale X`        | float | (-inf, +inf) | 1.0     | X scale.                                              |
-| `Scale Y`        | float | (-inf, +inf) | 1.0     | Y scale.                                              |
-| `Scale Z`        | float | (-inf, +inf) | 1.0     | Z scale.                                              |
+| Parameter         | Type  | Range        | Default | Description                                                  |
+| ----------------- | ----- | ------------ | ------- | ------------------------------------------------------------ |
+| `Transform Order` | enum  |              | 0       | Order in which the transformations are applied. Possible values include {`SRT` = 0, `STR` = 1, `RST` = 2, `RTS` = 3, `TSR` = 4, `TRS` = 5}. |
+| `Translate X`     | float | (-inf, +inf) | 0.0     | X translation.                                               |
+| `Translate Y`     | float | (-inf, +inf) | 0.0     | Y translation.                                               |
+| `Translate Z`     | float | (-inf, +inf) | 0.0     | Z translation.                                               |
+| `Rotate X Pitch`  | float | (-inf, +inf) | 0.0     | Euler angle (degrees) of pitch, or rotation around X.        |
+| `Rotate Y Yaw`    | float | (-inf, +inf) | 0.0     | Euler angle (degrees) of yaw, or rotation around Y.          |
+| `Rotate Z Roll`   | float | (-inf, +inf) | 0.0     | Euler angle (degrees) of roll, or rotation around Z.         |
+| `Scale X`         | float | (-inf, +inf) | 1.0     | X scale.                                                     |
+| `Scale Y`         | float | (-inf, +inf) | 1.0     | Y scale.                                                     |
+| `Scale Z`         | float | (-inf, +inf) | 1.0     | Z scale.                                                     |
 
 ## Troubleshooting
 
