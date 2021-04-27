@@ -30,7 +30,7 @@ public:
 	// When the prediction is linked to observed, are the prediction's
 	// rates copied from the observation or derived from the 
 	// observation's frame only?
-	ofxFilterData::ReconciliationMode existingLinkReconMode = ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL;
+	ofxFilterData::ReconciliationMode existingLinkReconMode = ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_FRAME_AND_VALID_RATES;
 
 	// After how many frames will the predictions and
 	// observations unlink?
@@ -56,7 +56,7 @@ public:
 	// last predicted rates?
 	// How are new links' predicted data reconciled with existing
 	// data?
-	ofxFilterData::ReconciliationMode newLinkReconMode = ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL;
+	ofxFilterData::ReconciliationMode newLinkReconMode = ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_FRAME_AND_VALID_RATES;
 
 	// Convergence params
 	ofxFilterData::ConvergenceParams convParams;

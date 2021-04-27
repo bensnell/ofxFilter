@@ -349,6 +349,20 @@ void ofxFilterData::reconcile(ofxFilterData& a, ReconciliationMode mode) {
         ofLogError("ofxFilterData") << "This reconciliation mode has not been properly setup yet. Use a different one";
 
 	}; break;
+    case ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_FRAME_AND_VALID_RATES: {
+
+        // ==== ALL (BUT ONLY VALID RATES) ====
+        // Strange behaviors have been observed when, while linked and receiving invalid data, a single 
+        // valid frame (with mostly invalid rates) is received, followed by more invalid data. 
+        // If COPY_ALL were used, then these invalid rates would be copied to the convergence data 
+        // and be persisted indefinitely. To counter this, it is recommended to copy everything (except those
+        // rates which are invalid).
+
+        bValid = a.bValid;
+        m = a.m;
+        r.copyValidFrom(a.r);
+
+    }; break;
 	case ofxFilterData::ReconciliationMode::OFXFILTERDATA_RECONCILE_COPY_ALL: default: {
 
 		// ===== ALL =====
