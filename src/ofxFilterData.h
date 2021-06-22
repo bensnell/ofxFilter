@@ -27,13 +27,25 @@ public:
 		if (i < 0 || i >= size()) return false;
 		return b[i];
 	}
+	string orderValidities() {
+		stringstream ss;
+		for (int i = 0; i < size(); i++) {
+			if (i != 0) ss << " ";
+			ss << b[i];
+		}
+		return ss.str();
+	}
 
-	void init(int size) {
-		clear();
+	void resize(int size) {
 		b.resize(size, false);
 		t.resize(size, { 0,0,0 });
 		r.resize(size, { 0,0,0 });
 		s.resize(size, { 0,0,0 });
+	}
+
+	void init(int size) {
+		clear();
+		resize(size);
 	}
 
 	void clear() {
@@ -41,6 +53,23 @@ public:
 		t.clear();
 		r.clear();
 		s.clear();
+	}
+
+	// Copy valid rates from another rate
+	void copyValidFrom(mat4rate& other) {
+		// Resize losslessly 
+		if (other.size() > size()) {
+			resize(other.size());
+		}
+		// For every order, copy any valid data
+		for (int order = 0; order < MIN(size(), other.size()); order++) {
+			if (other.isOrderValid(order)) {
+				b[order] = other.b[order];
+				t[order] = other.t[order];
+				r[order] = other.r[order];
+				s[order] = other.s[order];
+			}
+		}
 	}
 
 	
@@ -173,10 +202,11 @@ public:
 		OFXFILTERDATA_RECONCILE_COPY_ALL = 0,
 		OFXFILTERDATA_RECONCILE_COPY_FRAME,
 		OFXFILTERDATA_RECONCILE_COPY_FRAME_AND_UPDATE_RATE,
+		OFXFILTERDATA_RECONCILE_COPY_FRAME_AND_VALID_RATES,
 		NUM_OFXFILTERDATA_RECONCILE_MODES
 	};
 	static vector<string> getReconciliationModes() {
-		return { "Copy All", "Copy Frame", "Copy Frame and Update Rate" };
+		return { "Copy All", "Copy Frame", "Copy Frame and Update Rate", "Copy Frame and Valid Rates" };
 	}
 	void reconcile(ofxFilterData& a, ReconciliationMode mode);
 
